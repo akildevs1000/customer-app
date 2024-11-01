@@ -211,6 +211,7 @@ export default {
     previewImages: [],
     attachments: [],
     oldCount: 0,
+    intervalId: null,
   }),
   async mounted() {
     console.log("🚀 ~ created ~ created:");
@@ -222,7 +223,16 @@ export default {
   async created() {
     await this.setValues();
   },
+  beforeDestroy() {
+    this.clearMessageCountInterval();
+  },
   methods: {
+    clearMessageCountInterval() {
+      if (this.intervalId) {
+        clearInterval(this.intervalId);
+        this.intervalId = null; // Reset the intervalId
+      }
+    },
     async setValues() {
       this.sender_id = this.$localStorage.get("customer_id") || 0;
       console.log("🚀 ~ created ~ this.sender_id:", this.sender_id);
@@ -234,7 +244,7 @@ export default {
       console.log("🚀 ~ created ~ this.oldCount:", this.oldCount);
     },
     async checkForNewMessageCount() {
-      setInterval(async () => {
+      this.intervalId = setInterval(async () => {
         let { data } = await this.$axios.get(
           `latest-message-count-customer-id/${this.sender_id}`
         );
