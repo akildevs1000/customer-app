@@ -12,8 +12,8 @@
       <div
         ref="chatMessages"
         :style="`overflow-y: scroll; overflow-x: hidden; 
-        min-height: ${previewImages.length == 0 ? '700px' : '650px'};
-        max-height: ${previewImages.length == 0 ? '700px' : '650px'}`"
+        min-height: ${previewImages.length == 0 ? '400px' : '350px'};
+        max-height: ${previewImages.length == 0 ? '400px' : '350px'}`"
       >
         <div
           v-if="!messages.length"
