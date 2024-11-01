@@ -32,7 +32,7 @@
               >
                 <v-card-text>
                   <img
-                    :src="profilePic ?? '@/static/noimage.png'"
+                    :src="`${profilePic ?? '@/static/noimage.png'}`"
                     style="
                       max-height: 250px;
                       max-width: 100%;
@@ -193,7 +193,7 @@ export default {
       this.$axios.get(`get_checkin_customer_data`, options).then(({ data }) => {
         this.otp_sent = true;
 
-        console.log("data", this.whatsapp_otp = data.record.whatsapp_otp);
+        console.log("data", (this.whatsapp_otp = data.record.whatsapp_otp));
         if (data.status == true) {
           this.$store.commit("hotelQrcodeRequestId", this.id);
           this.$store.commit("hotelQrcodeCompanyId", company_id);
