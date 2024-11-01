@@ -32,7 +32,7 @@
               >
                 <v-card-text>
                   <img
-                    :src="`${profilePic ?? '@/static/noimage.png'}`"
+                    :src="profilePic"
                     style="
                       max-height: 250px;
                       max-width: 100%;
@@ -213,7 +213,9 @@ export default {
           localStorage.setItem("customer_id", data.record.customer.id);
 
           this.whatsapp_number = data.record.customer.whatsapp;
-          this.profilePic = data.record.customer.image;
+          this.profilePic =
+            data.record.customer.image ||
+            "https://customer.myhotel2cloud.com/noimage.png";
 
           this.customerName =
             data.record.customer.title + " " + data.record.customer.full_name;
