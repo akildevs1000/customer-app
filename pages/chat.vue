@@ -195,6 +195,8 @@
 </template>
 
 <script>
+import Pusher from "pusher-js";
+
 export default {
   layout: "qrcode",
   auth: false,
@@ -208,23 +210,60 @@ export default {
     company_id: 0,
     previewImages: [],
     attachments: [],
+    oldCount: 0,
   }),
-  mounted() {},
-  async created() {
-    this.sender_id = 3;
-    this.company_id = 3;
-
+  async mounted() {
+    console.log("🚀 ~ created ~ created:");
     await this.getMessages();
-
+    this.scrollToBottom();
     this.previewImages = [];
-
-    setInterval(async () => {
-      await this.getMessages();
-    }, 5000);
-
-    this.scrollToBottom(); // Scroll to the bottom after fetching messages
+    await this.checkForNewMessageCount();
+  },
+  async created() {
+    await this.setValues();
   },
   methods: {
+    async setValues() {
+      this.sender_id = this.$localStorage.get("customer_id") || 0;
+      console.log("🚀 ~ created ~ this.sender_id:", this.sender_id);
+      this.company_id = this.$localStorage.get("hotelQrcodeCompanyId") || 0;
+      console.log("🚀 ~ created ~ this.company_id:", this.company_id);
+      this.oldCount = this.$localStorage.get(
+        "old-message-count-by-customer-id"
+      );
+      console.log("🚀 ~ created ~ this.oldCount:", this.oldCount);
+    },
+    async checkForNewMessageCount() {
+      setInterval(async () => {
+        let { data } = await this.$axios.get(
+          `latest-message-count-customer-id/${this.sender_id}`
+        );
+
+        let oldCount = this.oldCount;
+
+        if (data != oldCount) {
+          oldCount = data;
+          console.log("🚀 ~ setInterval ~ data, oldCount:", data, oldCount);
+
+          await this.getMessages();
+        }
+      }, 5000);
+
+      // Pusher.logToConsole = true;
+      // const pusher = new Pusher("push_access_key", {
+      //   cluster: "ap2",
+      // });
+
+      // // Subscribe to the channel and bind to the event
+      // const channel = pusher.subscribe(
+      //   "customer-channel" + localStorage.getItem("customer_id") || '0' // get customer_id value from localstorage
+      // );
+      // channel.bind("my-event", async (data) => {
+      //   await this.getMessages();
+      //   this.scrollToBottom(); // Scroll to the bottom after fetching messages
+      // });
+    },
+
     handleMultipleFileSelection(e) {
       this.previewImages = e;
     },
