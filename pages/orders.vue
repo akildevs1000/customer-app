@@ -121,8 +121,8 @@ export default {
     async getDataFromApi() {
       let config = {
         params: {
-          booking_id: 4,
-          room_id: 92,
+          booking_id: 75,
+          room_id: 82,
         },
       };
       this.loading = true;
