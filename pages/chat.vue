@@ -1,27 +1,33 @@
 <template>
-  <v-container>
-    <style>
-      .chat-container {
-        display: flex;
-        flex-direction: column;
-        height: 8vh;
-      }
-    </style>
-
-    <v-container fluid class="mt-10">
-      <div
-        ref="chatMessages"
-        :style="`overflow-y: scroll; overflow-x: hidden; 
-        min-height: ${previewImages.length == 0 ? '480px' : '330px'};
-        max-height: ${previewImages.length == 0 ? '480px' : '330px'}`"
+  <v-container
+    fluid
+    class="mt-5"
+    style="
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 90vh;
+      padding: 0;
+    "
+  >
+    <!-- Chat Messages Container -->
+    <v-card
+      style="flex: 1; overflow-y: auto; padding: 16px; min-height: 50vh"
+      elevation="0"
+    >
+      <v-container
+        v-if="messages.length === 0"
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: inherit;
+        "
       >
-        <div
-          v-if="!messages.length"
-          style="align-items: center; justify-content: center; height: 75vh"
-          class="d-flex"
-        >
-          No message found
-        </div>
+        <p class="text-center">No messages yet</p>
+      </v-container>
+
+      <v-container v-else style="display: flex; flex-direction: column">
         <div
           v-for="(message, index) in messages"
           :key="index"
@@ -123,77 +129,83 @@
             </div>
           </div>
         </div>
-      </div>
-    </v-container>
-    <div style="position: relative" v-if="previewImages.length">
-      <v-row no-gutters>
-        <v-col
-          cols="2"
-          v-for="(previewImage, index) in previewImages"
-          :key="index"
-        >
-          <div style="position: relative">
-            <v-icon
-              class="my-icon"
-              style="position: absolute; z-index: 1; left: 30px; top: -6px"
-              right
-              color="red"
-              small
-              @click="removePreviewImage(index)"
-            >
-              mdi-close
-            </v-icon>
+        <!-- <v-row>
+          <v-col
+            v-for="(message, index) in messages"
+            :key="index"
+            cols="12"
+            class="message"
+            >{{ message }}</v-col
+          >
+        </v-row> -->
+      </v-container>
+    </v-card>
 
-            <v-avatar
-              style="border: 1px solid purple; border-radius: 10px !important"
-              tile
-              size="50"
-            >
-              <v-img :src="previewImage"></v-img>
-            </v-avatar>
-          </div>
-        </v-col>
-      </v-row>
-    </div>
-    <div class="chat-container">
-      <div class="input-area">
-        <div
-          :style="`display: flex; padding-top: ${
-            messages.length == 0 ? '45' : '30'
-          }px;`"
-        >
-          <div style="width: 100%">
-            <v-text-field
-              @paste="handlePaste"
-              outlined
-              dense
-              hide-details
-              v-model="newMessage"
-              label="Type your message..."
-              @keyup.enter="sendMessage"
-              style="width: 100%"
-            >
-              <template v-slot:append>
-                <UploadMultiplePhotos
-                  @files-selected="handleMultipleFileSelection($event)"
-                /> </template
-            ></v-text-field>
-          </div>
-          <div class="ml-2">
-            <v-icon
-              color="primary"
-              @click="sendMessage"
-              style="cursor: pointer; flex-grow: 1; margin-top: 5px"
-            >
-              mdi-send
-            </v-icon>
-          </div>
+    <!-- Input Field at Bottom -->
+    <div style="position: sticky; bottom: 60px; background: white">
+      <div v-if="previewImages.length" class="mb-1"
+      >
+        <v-row no-gutters>
+          <v-col
+            cols="2"
+            v-for="(previewImage, index) in previewImages"
+            :key="index"
+          >
+            <div style="position: relative">
+              <v-icon
+                class="my-icon"
+                style="position: absolute; z-index: 1; left: 30px; top: -6px"
+                right
+                color="red"
+                small
+                @click="removePreviewImage(index)"
+              >
+                mdi-close
+              </v-icon>
+
+              <v-avatar
+                style="border: 1px solid purple; border-radius: 10px !important"
+                tile
+                size="50"
+              >
+                <v-img :src="previewImage"></v-img>
+              </v-avatar>
+            </div>
+          </v-col>
+        </v-row>
+      </div>
+      
+      <div style="display: flex">
+        <div style="width: 100%">
+          <v-text-field
+            @paste="handlePaste"
+            outlined
+            dense
+            hide-details
+            v-model="newMessage"
+            label="Type your message..."
+            @keyup.enter="sendMessage"
+            style="width: 100%"
+          >
+            <template v-slot:append>
+              <UploadMultiplePhotos
+                @files-selected="handleMultipleFileSelection($event)"
+              /> </template
+          ></v-text-field>
+        </div>
+        <div class="ml-2">
+          <v-icon
+            color="primary"
+            @click="sendMessage"
+            style="cursor: pointer; flex-grow: 1; margin-top: 5px"
+          >
+            mdi-send
+          </v-icon>
         </div>
       </div>
     </div>
   </v-container>
 </template>
-
 <script>
 import Pusher from "pusher-js";
 
@@ -294,8 +306,8 @@ export default {
 
     scrollToBottom() {
       // Scroll to the bottom of the chat messages container
-      const chatContainer = this.$refs.chatMessages;
-      chatContainer.scrollTop = chatContainer.scrollHeight;
+      // const chatContainer = this.$refs.chatMessages;
+      // chatContainer.scrollTop = chatContainer.scrollHeight;
     },
     async sendMessage() {
       try {

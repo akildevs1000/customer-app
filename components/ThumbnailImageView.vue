@@ -1,6 +1,6 @@
 <template>
-  <v-dialog persistent v-model="dialog" width="380">
-    <AssetsIconClose left="370" @click="dialog = false" />
+  <v-dialog persistent v-model="dialog" width="350">
+    <AssetsIconClose left="334" @click="dialog = false" />
     <template v-slot:activator="{ on, attrs }">
       <v-img v-bind="attrs" v-on="on" :src="src"></v-img>
     </template>
