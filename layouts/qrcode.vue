@@ -188,131 +188,22 @@ export default {
     currentTime: "00:00:00",
     drawer: false,
     group: null,
-    id: "",
-    pageValid: true,
-    guest_check_in_time: "Check-In: ---",
-    guest_check_out_time: "Check-In: ---",
-    guest_room_number: "---",
-    guest_name: "---",
-    guest_whatsapp_number: "---",
-    // hideMenu: false,
   }),
   auth: false,
   mounted() {
     setInterval(() => {
       this.currentTime = new Date().toLocaleTimeString([], { hour12: false });
     }, 1000);
-    console.log("this.$route.name M", this.$route.name);
-    if (this.$route.name != "qrcode-id") {
-      this.id = localStorage.getItem("hotelQrcodeID");
-    } else {
-      this.id = this.$route.params.id;
-      this.$store.commit("hotelQrcodeID", this.id);
-      if (localStorage) localStorage.setItem("hotelQrcodeID", this.id);
-    }
   },
   watch: {
     group() {
       this.drawer = false;
     },
   },
-  created() {
-    setTimeout(() => {
-      // try {
-      console.log("this.$route.name C", this.$route.name);
-      if (this.$route.name == "qrcode-id") {
-        this.id = this.$route.params.id;
-        this.$store.commit("hotelQrcodeID", this.id);
-        //this.hideMenu = false;
-      } else {
-        // this.hideMenu = true;
-        this.id = this.$store.state.hotelQrcodeID;
-        console.log(
-          " this.$store.state.hotelQrcodeID",
-          this.$store.state.hotelQrcodeID
-        );
-        try {
-          if (localStorage) this.id = localStorage.getItem("hotelQrcodeID");
-        } catch (e) {}
-      }
-
-      let IdArray = this.id.split("-");
-
-      if (!IdArray) {
-        alert();
-        console.log(`sdfsdf`);
-      }
-
-      if (IdArray.length == 3) {
-        this.getGuestDetails(IdArray[0], IdArray[2], IdArray[1]);
-      } else {
-        this.pageValid = false;
-        this.guest_room_number = "";
-        this.guest_check_out_time = "";
-        this.guest_check_in_time = "";
-        this.guest_name = "";
-        this.$store.commit("hotelQrcodeRequestId", null);
-        this.$store.commit("hotelQrcodeCompanyId", null);
-        this.$store.commit("hotelQrcodeRoomNumber", null);
-        this.$store.commit("hotelQrcodeRoomId", null);
-        //this.$router.push("/qrcode");
-      }
-      // } catch (error) {
-      //   this.pageValid = false;
-      // }
-    }, 1000);
-  },
+  created() {},
   methods: {
     goToPage(name) {
       this.$router.push(name);
-    },
-    dateFormatDisplay(date) {
-      const currentDate = new Date(date);
-      const options = {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "numeric",
-        hour12: true,
-      };
-
-      return currentDate.toLocaleString("en-US", options);
-    },
-    getGuestDetails(company_id, roomId, roomNo) {
-      let options = {
-        params: {
-          company_id: company_id,
-          room_id: roomId,
-        },
-      };
-
-      this.$axios.get(`get_checkin_customer_data`, options).then(({ data }) => {
-        if (data.status) {
-          this.guest_check_in_time = data.record.check_in;
-          this.guest_check_out_time = data.record.check_out;
-          this.guest_room_number = data.record.room_no;
-
-          this.guest_name =
-            data.record.customer.title + " " + data.record.customer.full_name;
-          this.guest_whatsapp_number = data.record.customer.whatsapp;
-
-          this.$store.commit("hotelQrcodeRequestId", this.id);
-          this.$store.commit("hotelQrcodeCompanyId", company_id);
-          this.$store.commit("hotelQrcodeRoomNumber", roomNo);
-          this.$store.commit("hotelQrcodeRoomId", roomId);
-          this.$store.commit(
-            "hotelQrcodeWhatsappNumber",
-            data.record.customer.whatsapp
-          );
-
-          localStorage.setItem("hotelQrcodeCompanyId", company_id);
-          localStorage.setItem("hotelQrcodeRoomNumber", roomNo);
-          localStorage.setItem("hotelQrcodeRoomId", roomId);
-          localStorage.setItem("hotelQrcodeBookingId", data.record.booking_id);
-        } else if (data.status == false) {
-        }
-      });
     },
   },
 };

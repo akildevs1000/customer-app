@@ -111,7 +111,7 @@ export default {
     welcomeSection: true,
     errorMessages: [],
     id: "",
-    pageValid: true,
+    pageValid: false,
     whatsapp_otp: "",
     name: "",
     whatsapp_number: "",
@@ -123,7 +123,6 @@ export default {
     message: "Validating your Booking information. Please wait.. ",
     expand: false,
     customerName: "",
-
     queryParams: null,
   }),
 
@@ -136,26 +135,12 @@ export default {
       this.welcomeSection = false;
       this.expand = true;
     }, 3000);
-    this.$nextTick(function () {
-      this.whatsapp_number = this.maskNumber(
-        this.$store.state.hotelQrcodeWhatsappNumber
-      );
-      if (this.$store.state.hotelQrcodeRoomNumber) {
-      } else {
-        this.pageValid = false;
-      }
-    });
   },
   created() {
+    this.profilePic = "https://customer.myhotel2cloud.com/noimage.png";
     this.$store.commit("hotelQRCodeOTPverified", false);
-    // ?company_id=3&room_id=82&room_no=101
-    // let { company_id, room_id, room_no } = this.$route.query;
+    // http://localhost:3005/?company_id=3&room_id=92&room_no=101
     this.queryParams = this.$route.query;
-
-    // this.whatsapp_number = this.maskNumber(
-    //   this.$store.state.hotelQrcodeWhatsappNumber
-    // );
-    console.log("Home page");
   },
   methods: {
     sendOTP() {
@@ -174,54 +159,64 @@ export default {
         },
       };
       this.loading = true;
-      this.$axios.get(`get_checkin_customer_data`, options).then(({ data }) => {
-        this.otp_sent = true;
-        this.whatsapp_otp = data.record.whatsapp_otp;
+      this.$axios
+        .get(`get_checkin_customer_data`, options)
+        .then(({ data }) => {
+          this.otp_sent = true;
 
-        if (data.status) {
-          const { company_id, room_no, room_id } = params;
-          const customer = data.record.customer;
+          if (data.status) {
+            this.whatsapp_otp = data.record.whatsapp_otp;
+            const { company_id, room_no, room_id } = params;
+            const customer = data.record.customer;
 
-          // Commit data to the store
-          this.$store.commit("hotelQrcodeCompanyId", company_id);
-          this.$store.commit("hotelQrcodeRoomNumber", room_no);
-          this.$store.commit("hotelQrcodeRoomId", room_id);
-          this.$store.commit("customer_id", customer.id);
-          this.$store.commit("hotelQrcodeWhatsappNumber", customer.whatsapp);
+            // Commit data to the store
+            this.$store.commit("hotelQrcodeCompanyId", company_id);
+            this.$store.commit("hotelQrcodeRoomNumber", room_no);
+            this.$store.commit("hotelQrcodeRoomId", room_id);
+            this.$store.commit("customer_id", customer.id);
+            this.$store.commit("hotelQrcodeWhatsappNumber", customer.whatsapp);
 
-          // Update component state
-          this.customer_otp = this.whatsapp_otp;
-          this.loading = false;
+            // Update component state
+            this.customer_otp = this.whatsapp_otp;
+            this.loading = false;
 
-          // Store data in localStorage
-          const storageData = {
-            hotelQrcodeCompanyId: company_id,
-            hotelQrcodeRoomNumber: room_no,
-            hotelQrcodeRoomId: room_id,
-            hotelQrcodeBookingId: data.record.booking_id,
-            customer_id: customer.id,
-          };
+            // Store data in localStorage
+            const storageData = {
+              hotelQrcodeCompanyId: company_id,
+              hotelQrcodeRoomNumber: room_no,
+              hotelQrcodeRoomId: room_id,
+              hotelQrcodeBookingId: data.record.booking_id,
+              customer_id: customer.id,
+            };
 
-          Object.entries(storageData).forEach(([key, value]) => {
-            localStorage.setItem(key, value);
-          });
+            Object.entries(storageData).forEach(([key, value]) => {
+              localStorage.setItem(key, value);
+            });
 
-          // Set component properties
-          this.whatsapp_number = customer.whatsapp;
-          this.profilePic =
-            customer.image || "https://customer.myhotel2cloud.com/noimage.png";
-          this.customerName = `${customer.title} ${customer.full_name}`;
-        } 
-        
-        else if (data.status == false) {
-          this.loading = false;
+            // Set component properties
+            this.whatsapp_number = customer.whatsapp;
+            this.profilePic =
+              customer.image ||
+              "https://customer.myhotel2cloud.com/noimage.png";
+            this.customerName = `${customer.title} ${customer.full_name}`;
+
+            this.pageValid = true;
+          } else if (data.status == false) {
+            this.loading = false;
+            this.message =
+              "Check-in Details are not Found.Please scan QR code again Sorry for the inconvenience";
+            alert(this.message);
+          }
+
+          setTimeout(() => {
+            this.loadingStep1 = false;
+          }, 3000);
+        })
+        .catch((e) => {
           this.message =
-            "Check-in Details are not Found. <br/>Please scan QR code again.<br/> Sorry for the inconvenience";
-        }
-        setTimeout(() => {
-          this.loadingStep1 = false;
-        }, 3000);
-      });
+            "Check-in Details are not Found.Please scan QR code again Sorry for the inconvenience";
+          alert(this.message);
+        });
 
       setTimeout(() => {
         this.loading = false;
@@ -230,14 +225,6 @@ export default {
     maskNumber(number) {
       if (number)
         return "X".repeat(Math.max(0, number.length - 5)) + number.slice(-4);
-    },
-    isPageValid() {
-      if (this.$store.state.hotelQrcodeRoomNumber) {
-        return true;
-      } else {
-        this.pageValid = false;
-        return false;
-      }
     },
     openPage(name) {
       this.$router.push("/qrcode/" + name);

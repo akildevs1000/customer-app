@@ -197,7 +197,7 @@
           <v-icon
             color="primary"
             @click="sendMessage"
-            style="cursor: pointer; flex-grow: 1; margin-top: 5px"
+            style="cursor: pointer; flex-grow: 1; margin-top: 8px"
           >
             mdi-send
           </v-icon>
