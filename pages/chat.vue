@@ -55,7 +55,7 @@
               >
                 <source :src="message.voice_note" />
               </audio>
-              <span v-else>---</span>
+
               <div>
                 <v-avatar
                   class="mr-1 my-2"
@@ -122,7 +122,7 @@
               >
                 <source :src="message.voice_note" />
               </audio>
-              <span v-else>---</span>
+
               <div>
                 <v-avatar
                   v-for="(chat_photo, index) in message.chat_photos"
