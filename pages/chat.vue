@@ -143,8 +143,7 @@
 
     <!-- Input Field at Bottom -->
     <div style="position: sticky; bottom: 60px; background: white">
-      <div v-if="previewImages.length" class="mb-1"
-      >
+      <div v-if="previewImages.length" class="mb-1">
         <v-row no-gutters>
           <v-col
             cols="2"
@@ -174,7 +173,7 @@
           </v-col>
         </v-row>
       </div>
-      
+
       <div style="display: flex">
         <div style="width: 100%">
           <v-text-field
@@ -188,9 +187,15 @@
             style="width: 100%"
           >
             <template v-slot:append>
-              <UploadMultiplePhotos
-                @files-selected="handleMultipleFileSelection($event)"
-              /> </template
+              <span>
+                <UploadMultiplePhotos
+                  @files-selected="handleMultipleFileSelection($event)"
+                />
+              </span>
+              <span style="margin-right: 18px !important">
+                <WidgetsVoice
+                  @voice-note="handleVoiceNote($event, `${Date.now()}.mp3`)"
+              /></span> </template
           ></v-text-field>
         </div>
         <div class="ml-2">
@@ -224,6 +229,7 @@ export default {
     attachments: [],
     oldCount: 0,
     intervalId: null,
+    voice: null,
   }),
   async mounted() {
     console.log("🚀 ~ created ~ created:");
@@ -239,6 +245,12 @@ export default {
     this.clearMessageCountInterval();
   },
   methods: {
+    handleVoiceNote(e, name) {
+      this.voice = {
+        voice_note: e,
+        voice_note_name: name,
+      };
+    },
     clearMessageCountInterval() {
       if (this.intervalId) {
         clearInterval(this.intervalId);
@@ -317,6 +329,8 @@ export default {
           receiver_id: this.receiver_id,
           chat_photos: this.previewImages,
           company_id: this.company_id,
+
+          ...this.voice,
         };
 
         await this.$axios.post(`chat`, payload);
