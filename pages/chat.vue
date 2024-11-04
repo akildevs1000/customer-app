@@ -48,6 +48,14 @@
               "
               class="text-right"
             >
+              <audio
+                v-if="message.voice_note"
+                controls
+                style="width: 200px; height: 40px; margin-top: -4px"
+              >
+                <source :src="message.voice_note" />
+              </audio>
+              <span v-else>---</span>
               <div>
                 <v-avatar
                   class="mr-1 my-2"
@@ -107,6 +115,14 @@
               "
               class="mt-3"
             >
+              <audio
+                v-if="message.voice_note"
+                controls
+                style="width: 200px; height: 40px; margin-top: -4px"
+              >
+                <source :src="message.voice_note" />
+              </audio>
+              <span v-else>---</span>
               <div>
                 <v-avatar
                   v-for="(chat_photo, index) in message.chat_photos"
