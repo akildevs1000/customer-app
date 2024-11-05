@@ -90,7 +90,7 @@
               >
             </div>
 
-            <v-avatar
+            <!-- <v-avatar
               :class="`purple lighten-1 ${
                 message && message.chat_photos.length > 0 ? 'mt-5' : 'mt-2'
               }`"
@@ -99,13 +99,13 @@
               <v-icon color="white" style="align-self: flex-start"
                 >mdi-account</v-icon
               >
-            </v-avatar>
+            </v-avatar> -->
           </div>
 
           <div style="display: flex" v-else class="pb-1">
-            <v-avatar class="grey lighten-1" size="40">
+            <!-- <v-avatar class="grey lighten-1" size="40">
               <v-icon color="white">mdi-account</v-icon>
-            </v-avatar>
+            </v-avatar> -->
             <div
               style="
                 font-size: 13px;
@@ -210,9 +210,11 @@
               </span>
               <span style="margin-right: 18px !important">
                 <WidgetsVoice
+                  :key="VoiceCompKey"
                   @voice-note="handleVoiceNote($event, `${Date.now()}.mp3`)"
-              /></span> </template
-          ></v-text-field>
+              /></span>
+            </template>
+          </v-text-field>
         </div>
         <div class="ml-2">
           <v-icon
@@ -246,6 +248,7 @@ export default {
     oldCount: 0,
     intervalId: null,
     voice: null,
+    VoiceCompKey: 1,
   }),
   async mounted() {
     console.log("🚀 ~ created ~ created:");
@@ -330,6 +333,9 @@ export default {
       };
       let { data } = await this.$axios.get(`chat`, payload);
       this.messages = data;
+      this.VoiceCompKey += 1;
+      this.newMessage = "";
+      this.previewImages = [];
     },
 
     scrollToBottom() {
@@ -351,8 +357,6 @@ export default {
 
         await this.$axios.post(`chat`, payload);
         await this.getMessages();
-        this.newMessage = "";
-        this.previewImages = [];
       } catch (error) {
         console.log(error);
       }
