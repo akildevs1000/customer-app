@@ -75,6 +75,11 @@
                 </v-avatar>
               </div>
               <div
+                style="
+                  max-width: 200px;
+                  word-wrap: break-word;
+                  white-space: normal;
+                "
                 :class="` ${
                   message && message.chat_photos.length > 0 ? 'pr-2' : ''
                 }`"
@@ -140,7 +145,15 @@
                   />
                 </v-avatar>
               </div>
-              <div>{{ message.message }}</div>
+              <div
+                style="
+                  max-width: 200px;
+                  word-wrap: break-word;
+                  white-space: normal;
+                "
+              >
+                {{ message.message }}
+              </div>
               <small>{{ $dateFormat.hm(message.created_at) }}</small>
             </div>
           </div>
