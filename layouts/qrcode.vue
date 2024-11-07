@@ -131,10 +131,8 @@
     >
       <v-btn @click="goToPage('home')" style="border-right: 0px solid #ddd">
         <!-- <span class="qrcode-color">Home</span> -->
-        <v-avatar size="40" class="qrcode-bgcolor1">
-          <v-icon style="color: #1cae81 !important"
-            >mdi mdi-home-outline</v-icon
-          >
+        <v-avatar size="40">
+          <v-icon color="primary">mdi mdi-home-outline</v-icon>
         </v-avatar>
       </v-btn>
       <v-btn
@@ -142,26 +140,14 @@
         style="border-right: 0px solid #ddd"
       >
         <!-- <span class="qrcode-color">Food</span> -->
-        <v-avatar size="40" class="qrcode-bgcolor1">
-          <v-icon style="color: #1cae81 !important"
-            >mdi mdi-food</v-icon
-          ></v-avatar
+        <v-avatar size="40">
+          <v-icon color="primary">mdi mdi-food</v-icon></v-avatar
         >
       </v-btn>
       <v-btn @click="goToPage('orders')" style="border-right: 0px solid #ddd">
         <!-- <span class="qrcode-color">My Orders</span> -->
-        <v-avatar size="40" class="qrcode-bgcolor1"
-          ><v-icon style="color: #1cae81 !important"
-            >mdi mdi-cart</v-icon
-          ></v-avatar
-        >
-      </v-btn>
-      <v-btn @click="goToPage('home')" style="border-right: 0px solid #ddd">
-        <!-- <span class="qrcode-color">Check-out</span> -->
-        <v-avatar size="40" class="qrcode-bgcolor1">
-          <v-icon style="color: #1cae81 !important"
-            >mdi mdi-airplane-takeoff</v-icon
-          ></v-avatar
+        <v-avatar size="40"
+          ><v-icon color="primary">mdi mdi-cart</v-icon></v-avatar
         >
       </v-btn>
 
@@ -170,8 +156,18 @@
         style="border-right: 0px solid #ddd"
       >
         <!-- <span class="qrcode-color">Check-out</span> -->
-        <v-avatar size="40" class="qrcode-bgcolor1">
-          <v-icon style="color: #1cae81 !important">mdi-chat</v-icon></v-avatar
+        <v-avatar size="40">
+          <v-icon color="primary">mdi-chat</v-icon></v-avatar
+        >
+      </v-btn>
+
+      <v-btn
+        @click="$router.push(`/profile?company_id=3&room_id=92&room_no=101`)"
+        style="border-right: 0px solid #ddd"
+      >
+        <!-- <span class="qrcode-color">Check-out</span> -->
+        <v-avatar size="40">
+          <v-icon color="primary">mdi-account</v-icon></v-avatar
         >
       </v-btn>
       <!-- <v-btn @click="goToPage('home')" style="border-right: 0px solid #ddd">
