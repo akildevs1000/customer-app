@@ -6,7 +6,7 @@
         <v-col cols="12" class="text-center">
           <v-avatar size="200">
             <img
-              src="https://customer.myhotel2cloud.com/noimage.png"
+              :src="process.env.APP_URL + '/noimage.png'"
               alt="Customer Photo"
             />
           </v-avatar>
@@ -16,8 +16,6 @@
           <h3 class="text-color primary--text">Reservation # 10</h3>
           <!-- <div class="text-color heading">Checked into Room 305</div> -->
           <div class="text-color primary--text heading"></div>
-          
-
         </v-col>
       </v-row>
       <v-row>

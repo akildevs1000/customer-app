@@ -20,7 +20,9 @@
         </v-card-title>
         <v-card-text>
           <v-container>
-            <img :src="`https://hms-backend.test/storage/hotel/food_menu/3/5.png`" style="width: 500px; height: auto"
+            <img
+              :src="`https://hms-backend.test/storage/hotel/food_menu/3/5.png`"
+              style="width: 500px; height: auto"
           /></v-container>
         </v-card-text>
       </v-card>
@@ -64,7 +66,7 @@
               <div style="font-weight: bold; text-align: center">
                 {{ (items.amount * items.qty).toFixed(2) }}
               </div>
-              <!-- <v-btn
+              <v-btn
                 style="padding: 5px"
                 desne
                 small
@@ -74,9 +76,9 @@
                 color="green"
               >
                 Update</v-btn
-              > -->
+              >
             </v-col>
-            <!-- <v-col cols="2">
+            <v-col cols="2">
               <v-btn
                 icon
                 desne
@@ -88,7 +90,7 @@
               >
                 <v-icon>mdi mdi-checkbox-marked-circle</v-icon></v-btn
               >
-            </v-col> -->
+            </v-col>
           </v-row>
           <!-- <v-divider></v-divider> -->
           <v-row>
@@ -128,7 +130,7 @@
     </div>
 
     <div style="text-align: center" v-if="loading">
-      <img src="static/loading.gif" width="200px" />
+      <img src="/loading.gif" width="200px" />
     </div>
     <v-row style="width: 100%; text-align: center; margin: 0px; z-index: 10">
       <v-col
@@ -140,12 +142,12 @@
           @click="gotoCategoriesPage(timing)"
           elevation="24"
           class="p-5 boxshadow"
-          :src="`https://hms-backend.test/storage/hotel/food_menu/3/5.png`"
+          :src="timing.image"
           width="100%"
           style="max-width: 100%; height: 200px"
         />
         <br />
-        {{ timing.name }}
+        {{ timing.name }} Food Menu Timings
       </v-col>
     </v-row>
 
@@ -237,11 +239,14 @@ export default {
     this.getTimingsList();
   },
   created() {
+    this.$router.push("/food_categories");
+    return;
     this.company_id = this.$store.state.hotelQrcodeCompanyId;
   },
   methods: {
     gotoCategoriesPage(item) {
-      this.$router.push("/food_categories/" + item.id + "-" + item.name);
+      // this.$router.push("/food_categories/" + item.id + "-" + item.name);
+      this.$router.push("/food_categories/" + item.id);
     },
     itemPreview(itemPreviewImage) {
       this.dialogPreviewImage = true;
@@ -251,7 +256,7 @@ export default {
       return this.pageValid;
     },
     confirmToOrder() {
-      this.$router.push("/qrcode/cartItems");
+      this.$router.push("/cartItems");
     },
     viewCart() {
       this.cartItemDialog = true;
@@ -419,4 +424,3 @@ export default {
   },
 };
 </script>
-<style scoped></style>

@@ -429,11 +429,7 @@
                     room.device && room.device.latest_status == 1 ? 'red' : ''
                   "
                 >
-                  {{
-                    room?.room_type?.type == "hall"
-                      ? "mdi-sofa"
-                      : "mdi-bed"
-                  }}
+                  {{ room?.room_type?.type == "hall" ? "mdi-sofa" : "mdi-bed" }}
                 </v-icon>
                 <div>{{ room?.room_no || "---" }}</div>
                 <div v-if="room?.room_type?.type !== 'hall'">
@@ -671,11 +667,7 @@
                     : ''
                 "
               >
-                {{
-                  room?.room_type?.type == "hall"
-                    ? "mdi-sofa"
-                    : "mdi-bed"
-                }}
+                {{ room?.room_type?.type == "hall" ? "mdi-sofa" : "mdi-bed" }}
               </v-icon>
               <div>{{ blockedRoom?.room_no || "---" }}</div>
               <div>
@@ -690,8 +682,6 @@
   <Preloader v-else />
 </template>
 <script>
-
-
 export default {
   props: [
     "searchQuery",
@@ -964,7 +954,7 @@ export default {
         },
       };
 
-      this.$store.commit("booking_payload", payload);
+      // this.$store.commit("booking_payload", payload);
       this.$axios
         .get(`get_data_by_select_with_tax`, payload)
         .then(({ data }) => {

@@ -10,10 +10,7 @@
           class="text-center"
           v-if="welcomeSection"
         >
-          <img
-            src="@/static/logo.png"
-            style="padding-top: 50%; max-width: 100%"
-          />
+          <img src="/loading.gif" style="padding-top: 50%; max-width: 100%" />
         </v-col>
       </v-row>
       <v-expand-x-transition mode="in" hide-on-leave="true">
@@ -22,7 +19,7 @@
             <v-col cols="12" sm="12" md="12" lg="12" class="text-center">
               <div v-if="loadingStep1">
                 Validating your Booking information. Please wait...
-                <img src="@/static/loading.gif" width="200px" />
+                <img src="/loading.gif" width="200px" />
               </div>
               <v-card
                 elevation="0"
@@ -31,60 +28,146 @@
                 transition="slide-x-transition"
               >
                 <v-card-text>
-                  <img
-                    :src="profilePic"
-                    style="
-                      max-height: 250px;
-                      max-width: 100%;
-                      border-radius: 50%;
-                      height: 200px;
-                      width: 200px;
-                    "
-                  />
-                  <div class="text-center pt-8">Hello</div>
+                  <div>
+                    <div
+                      style="font-size: 20px; padding: 10px; font-weight: bold"
+                    >
+                      Welcome To
+                    </div>
+                    <img style="width: 200px" src="/login/login-logo.png" />
 
-                  <h2 style="color: black">{{ customerName }}</h2>
+                    <v-row>
+                      <v-col cols="12" class="pt-8"
+                        ><v-chip
+                          filter
+                          label
+                          color="primary"
+                          style="padding: 20px; font-size: 30px"
+                          ><v-icon left size="25">mdi-tag</v-icon> Room Number :
+                          {{ room_number }}</v-chip
+                        ></v-col
+                      >
+                      <v-col
+                        cols="12"
+                        style="font-size: 20px; font-weight: bold"
+                      >
+                        {{ customerName }}
+                      </v-col>
+                      <v-col cols="12" v-if="intro">
+                        <img
+                          src="/home1.jpeg"
+                          @click="
+                            sendOTP();
+                            intro = false;
+                          "
+                          class="profile-image"
+                        />
+                      </v-col>
+                    </v-row>
 
-                  <p class="text-center pt-8">
-                    Enter whatsapp OTP is sent to your Mobile Number: <br />
-                    {{ maskNumber(whatsapp_number) }}
-                  </p>
+                    <v-col cols="12" v-if="intro">
+                      <img
+                        src="/home2.jpeg"
+                        @click="
+                          sendOTP();
+                          intro = false;
+                        "
+                        class="profile-image"
+                      />
+                    </v-col>
+                    <v-col cols="12" v-if="intro">
+                      <v-btn
+                        dense
+                        fill
+                        color="red"
+                        style="color: #fff"
+                        @click="
+                          sendOTP();
+                          intro = false;
+                        "
+                        >Click to Order
+                        <v-icon class="pl-4" light>mdi-food</v-icon></v-btn
+                      >
+                    </v-col>
+                    <v-col cols="12" v-if="!intro">
+                      <v-row>
+                        <v-col>
+                          <img
+                            :src="profilePic"
+                            style="
+                              max-height: 250px;
+                              max-width: 100%;
+                              border-radius: 50%;
+                              height: 200px;
+                              width: 200px;
+                            "
+                          />
 
-                  <v-text-field
-                    clearable
-                    dense
-                    ref="name"
-                    outlined
-                    v-model="whatsapp_otp"
-                    :error-messages="errorMessages"
-                    label="Whatsapp OTP"
-                    placeholder="Whatsapp OTP"
-                    required
-                    type="number"
-                    append-icon="mdi mdi-whatsapp"
-                  ></v-text-field>
-                  <label style="color: red">{{ error_message }}</label>
+                          <p class="text-center pt-8">
+                            Enter whatsapp OTP is sent to your Mobile Number:
+                            <br />
+                            {{ maskNumber(whatsapp_number) }}
+                          </p>
+
+                          <v-text-field
+                            clearable
+                            dense
+                            ref="name"
+                            outlined
+                            v-model="whatsapp_otp"
+                            :error-messages="errorMessages"
+                            label="Whatsapp OTP"
+                            placeholder="Whatsapp OTP"
+                            required
+                            type="number"
+                            append-icon="mdi mdi-whatsapp"
+                          ></v-text-field>
+                          <label style="color: red">{{ error_message }}</label>
+
+                          <!-- <v-divider class="mt-12"></v-divider> -->
+
+                          <div>
+                            <v-btn
+                              style="width: 250px"
+                              class="otp-button primary"
+                              desne
+                              small
+                              primary
+                              @click="verifyOtp()"
+                            >
+                              Verify OTP
+                            </v-btn>
+                          </div>
+
+                          <div class="pt-3">
+                            <v-btn
+                              text
+                              color="error"
+                              desne
+                              small
+                              @click="sendOTP()"
+                            >
+                              Resend
+                            </v-btn>
+                          </div>
+                          <div class="pt-3">
+                            <v-btn
+                              style="width: 250px"
+                              text
+                              class="error"
+                              desne
+                              small
+                              @click="intro = true"
+                            >
+                              Back To Home
+                              <v-icon>mdi-home-circle-outline</v-icon>
+                            </v-btn>
+                          </div>
+                        </v-col>
+                      </v-row>
+                    </v-col>
+                  </div>
                 </v-card-text>
-                <!-- <v-divider class="mt-12"></v-divider> -->
-
-                <div>
-                  <v-btn
-                    style="width: 250px"
-                    class="otp-button"
-                    desne
-                    small
-                    rounded
-                    @click="verifyOtp()"
-                  >
-                    Verify OTP
-                  </v-btn>
-                </div>
-
-                <div class="pt-3">
-                  <v-btn text color="error" desne small @click="sendOTP()">
-                    Resend
-                  </v-btn>
-                </div>
               </v-card>
               <div style="padding-top: 60%; color: green" v-else-if="!loading">
                 <img
@@ -123,24 +206,36 @@ export default {
     message: "Validating your Booking information. Please wait.. ",
     expand: false,
     customerName: "",
+    intro: true,
     queryParams: null,
+    room_number: "",
   }),
 
   mounted() {
     this.clearDefaults();
-    setTimeout(() => {
-      this.sendOTP();
-    }, 1000);
+    this.sendOTP();
     setTimeout(() => {
       this.welcomeSection = false;
       this.expand = true;
     }, 3000);
   },
+  // watch: {
+  //   intro: {
+  //     handler() {
+  //       if (!this.intro) this.sendOTP();
+  //     },
+  //     deep: true,
+  //   },
+  // },
   created() {
-    this.profilePic = "https://customer.myhotel2cloud.com/noimage.png";
-    this.$store.commit("hotelQRCodeOTPverified", false);
+    this.profilePic = process.env.APP_URL + "/noimage.png";
+    // this.$store.commit("hotelQRCodeOTPverified", false);
     // http://localhost:3005/?company_id=3&room_id=92&room_no=101
     this.queryParams = this.$route.query;
+
+    // if (!this.intro) {
+    //   this.sendOTP();
+    // }
   },
   methods: {
     sendOTP() {
@@ -168,13 +263,28 @@ export default {
             this.whatsapp_otp = data.record.whatsapp_otp;
             const { company_id, room_no, room_id } = params;
             const customer = data.record.customer;
+            this.room_number = room_no;
 
             // Commit data to the store
-            this.$store.commit("hotelQrcodeCompanyId", company_id);
-            this.$store.commit("hotelQrcodeRoomNumber", room_no);
-            this.$store.commit("hotelQrcodeRoomId", room_id);
-            this.$store.commit("customer_id", customer.id);
-            this.$store.commit("hotelQrcodeWhatsappNumber", customer.whatsapp);
+            // this.$store.commit("hotelQrcodeCompanyId", company_id);
+            // this.$store.commit("hotelQrcodeRoomNumber", room_no);
+            // this.$store.commit("hotelQrcodeRoomId", room_id);
+            // this.$store.commit("customer_id", customer.id);
+            // this.$store.commit("hotelQrcodeWhatsappNumber", customer.whatsapp);
+
+            localStorage.setItem("hotelQrcodeCompanyId", company_id);
+            localStorage.setItem("hotelQrcodeRoomNumber", room_no);
+            localStorage.setItem("hotelQrcodeRoomId", room_id);
+            localStorage.setItem("customer_id", customer.id);
+
+            localStorage.setItem(
+              "hotelQrcodeBookingId",
+              data.record.booking_id
+            );
+            localStorage.setItem(
+              "hotelQrcodeWhatsappNumber",
+              customer.whatsapp
+            );
 
             // Update component state
             this.customer_otp = this.whatsapp_otp;
@@ -196,9 +306,8 @@ export default {
             // Set component properties
             this.whatsapp_number = customer.whatsapp;
             this.profilePic =
-              customer.image ||
-              "https://customer.myhotel2cloud.com/noimage.png";
-            this.customerName = `${customer.title} ${customer.full_name}`;
+              customer.image || process.env.APP_URL + "/noimage.png";
+            this.customerName = `${customer.title}. ${customer.full_name}`;
 
             this.pageValid = true;
           } else if (data.status == false) {
@@ -227,7 +336,7 @@ export default {
         return "X".repeat(Math.max(0, number.length - 5)) + number.slice(-4);
     },
     openPage(name) {
-      this.$router.push("/qrcode/" + name);
+      this.$router.push("/" + name);
     },
 
     verifyOtp() {
@@ -237,7 +346,7 @@ export default {
         this.$store.commit("hotelQRCodeOTPverified", true);
 
         localStorage.setItem("hotelQRCodeOTPverified", true);
-        this.$router.push("/home");
+        this.$router.push("/food_categories");
       } else {
         this.error_message = "Invalid OTP";
       }

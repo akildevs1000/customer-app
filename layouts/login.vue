@@ -2,10 +2,15 @@
   <nuxt />
 </template>
 
-<style scoped>
+<style>
 body {
   background-color: #f4feff;
   overflow: hidden;
+  max-width: 500px !important;
+  /* width: 500px !important; */
+  margin: auto !important;
+  border: 1px solid #ccc;
+  /* padding: 20px; */
 }
 
 .v-application .primary--text {

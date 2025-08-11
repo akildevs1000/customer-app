@@ -23,11 +23,9 @@
       </style>
 
       <v-card class="mx-auto" max-width="600" elevation="0">
-        <v-img
-          src="https://hyderspark.com/wp-content/uploads/2023/12/00.jpg"
-          height="200px"
-          alt="Hotel Image"
-        ></v-img>
+        <!-- <div style="width: 100%; text-align: center">
+          <v-img src="/logo.png" style="width: 200px" alt="Hotel Image"></v-img>
+        </div> -->
         <v-card-title class="headline"> HYDERSPARK LUXURY HOTEL </v-card-title>
 
         <v-card-text>

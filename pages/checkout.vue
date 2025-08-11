@@ -22,7 +22,8 @@
         <v-expansion-panels inset>
           <v-expansion-panel
             v-for="(items, datetime) in cartItems"
-            :key="index"
+            :key="datetime"
+            v-model="panels"
           >
             <v-expansion-panel-header
               >{{ datetime }} -
@@ -36,7 +37,7 @@
                   {{ index2 + 1 }}
                 </v-col>
                 <v-col class="text-center">
-                  <img
+                  <!-- <img
                     class="p-5 boxshadow"
                     :src="item.food.item_picture"
                     width="50px"
@@ -48,16 +49,19 @@
                       object-fit: cover;
                       cursor: pointer;
                     "
-                  />
-                  <div>{{ item.food?.name }}</div>
+                  /> -->
+                  <div>{{ item.item }}</div>
                 </v-col>
                 <v-col cols="4" class="pl-0 pr-0" flex>
                   <div style="font-size: 12px">
                     {{ item.qty }}
                     <v-icon color="green">mdi-alpha-x-box</v-icon>
-                    {{ item.food_price }}
+                    {{ item.single_amt }}
+
+                    {{ item.tax }}
+
                     <v-icon color="green">mdi-chevron-right</v-icon>
-                    {{ (item.food_price * item.qty).toFixed(2) }}
+                    {{ item.amount_with_tax.toFixed(2) }}
                   </div>
                 </v-col>
                 <v-col cols="3" class="flex">
@@ -149,6 +153,7 @@ export default {
     room_number: "",
     loading: false,
     pageValid: false,
+    panels: [],
   }),
   auth: false,
   mounted() {
@@ -190,7 +195,7 @@ export default {
       };
       this.loading = true;
       this.$axios
-        .get(`hotel_orders_get_food_items`, options)
+        .get(`get-posting-by-booking-id-and-room-id`, options)
         .then(({ data }) => {
           this.cartItems = data;
           this.calculateTotal();
@@ -201,8 +206,9 @@ export default {
     calculateTotal(item = null) {
       this.totals = {};
       this.cartGrandTotalAmount = 0; // reset before loop
-
+      let panelCount = 0;
       for (let datetime in this.cartItems) {
+        this.panels.push(panelCount++);
         const items = this.cartItems[datetime];
         let groupTotal = 0;
 

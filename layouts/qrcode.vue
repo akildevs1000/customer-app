@@ -1,8 +1,12 @@
 <template>
   <v-app>
     <style>
-      body {
+      body,
+      header {
         font-size: 11px !important;
+        max-width: 500px !important;
+        /* width: 500px !important; */
+        margin: auto !important;
       }
 
       .text-color {
@@ -13,6 +17,17 @@
       }
       .border-bottom {
         border-bottom: 1px solid #e0e0e0;
+      }
+      .v-expansion-panels--inset > .v-expansion-panel--active {
+        max-width: 100%;
+      }
+      .v-expansion-panel-header--active {
+        background-color: #bababa;
+      }
+
+      .v-expansion-panel--active > .v-expansion-panel-header {
+        min-height: 35px;
+        background: #8888ff;
       }
     </style>
     <v-app-bar fixed app dense flat>
@@ -108,12 +123,17 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-container>
+    <v-container
+      fluid
+      style="max-width: 500px; margin: 0 auto; border: 1px solid #ccc"
+    >
       <div class="header-bottom-image"></div>
+
       <div>
         <nuxt />
       </div>
     </v-container>
+
     <v-bottom-navigation
       :elevation="24"
       grow
@@ -129,14 +149,14 @@
         z-index: 9999;
       "
     >
-      <v-btn @click="goToPage('home')" style="border-right: 0px solid #ddd">
+      <v-btn @click="goToPage('/home')" style="border-right: 0px solid #ddd">
         <!-- <span class="qrcode-color">Home</span> -->
         <v-avatar size="40">
           <v-icon color="primary">mdi mdi-home-outline</v-icon>
         </v-avatar>
       </v-btn>
       <v-btn
-        @click="goToPage('food_menu')"
+        @click="goToPage('/food_menu')"
         style="border-right: 0px solid #ddd"
       >
         <!-- <span class="qrcode-color">Food</span> -->
@@ -144,10 +164,10 @@
           <v-icon color="primary">mdi mdi-food</v-icon></v-avatar
         >
       </v-btn>
-      <v-btn @click="goToPage('orders')" style="border-right: 0px solid #ddd">
+      <v-btn @click="goToPage('/orders')" style="border-right: 0px solid #ddd">
         <!-- <span class="qrcode-color">My Orders</span> -->
         <v-avatar size="40"
-          ><v-icon color="primary">mdi mdi-cart</v-icon></v-avatar
+          ><v-icon color="primary">mdi-format-list-bulleted</v-icon></v-avatar
         >
       </v-btn>
 
@@ -158,6 +178,16 @@
         <!-- <span class="qrcode-color">Check-out</span> -->
         <v-avatar size="40">
           <v-icon color="primary">mdi-chat</v-icon></v-avatar
+        >
+      </v-btn>
+
+      <v-btn
+        @click="goToPage('/checkout')"
+        style="border-right: 0px solid #ddd"
+      >
+        <!-- <span class="qrcode-color">Check-out</span> -->
+        <v-avatar size="40">
+          <v-icon color="primary">mdi-airplane-takeoff</v-icon></v-avatar
         >
       </v-btn>
 
@@ -204,3 +234,13 @@ export default {
   },
 };
 </script>
+<style>
+.profile-image {
+  height: 250px;
+  width: 250px;
+  max-height: 250px;
+  max-width: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+</style>
