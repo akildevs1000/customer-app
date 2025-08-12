@@ -1,48 +1,53 @@
 <template>
-  <div class="max-w-xl mx-auto">
+  <div class="wa-chat max-w-xl mx-auto">
     <div class="mb-2 text-sm text-gray-600">
       Hotel {{ hotelId }} · Room {{ roomId }}
     </div>
 
     <!-- Messages -->
-    <div
-      ref="list"
-      class="border rounded p-3"
-      style="height: 420px; overflow: auto"
-    >
-      <div v-for="m in messages" :key="m.id" class="mb-2" :style="bubble(m)">
-        <div class="text-xs opacity-60">
-          {{ prettySender(m.sender) }} · {{ time(m.ts) }}
-          <span v-if="m.role === 'guest'">
-            · <span v-if="m.seen" title="Seen by reception">✓✓</span
-            ><span v-else>✓</span>
-          </span>
-        </div>
+    <div ref="list" class="chat-body">
+      <div
+        v-for="m in messages"
+        :key="m.id"
+        class="msg"
+        :class="m.role === 'guest' ? 'me' : 'them'"
+      >
+        <div class="bubble">
+          <div class="meta">
+            <span class="sender">{{ prettySender(m.sender) }}</span>
+            <span>· {{ time(m.ts) }}</span>
+            <span
+              v-if="m.role === 'guest'"
+              class="ticks"
+              :class="{ read: m.seen }"
+            >
+              {{ m.seen ? "✓✓" : "✓" }}
+            </span>
+          </div>
 
-        <div v-if="m.type === 'text'">{{ m.text }}</div>
-        <a v-else-if="m.type === 'file'" :href="m.url" target="_blank">
-          {{ m.filename || "file" }}
-        </a>
-        <audio v-else-if="m.type === 'audio'" :src="m.url" controls></audio>
+          <div v-if="m.type === 'text'">{{ m.text }}</div>
+          <a v-else-if="m.type === 'file'" :href="m.url" target="_blank">
+            {{ m.filename || "file" }}
+          </a>
+          <audio v-else-if="m.type === 'audio'" :src="m.url" controls></audio>
+        </div>
       </div>
 
-      <div v-if="typingNames.length" class="text-xs opacity-60 mt-2">
+      <div v-if="typingNames.length" class="typing">
         {{ typingNames.join(", ") }} typing…
       </div>
     </div>
 
     <!-- Composer -->
-    <div class="mt-3 flex gap-2">
+    <div class="composer mt-3 flex gap-2">
       <input
         v-model="draft"
         @keydown="onKey"
         @input="sendTyping"
-        class="flex-1 border rounded px-3 py-2"
+        class="flex-1 input"
         placeholder="Write a message…"
       />
-      <button class="px-3 py-2 rounded bg-blue-600 text-white" @click="send">
-        Send
-      </button>
+      <button class="send-btn" @click="send">Send</button>
     </div>
 
     <!-- Optional: File upload -->
@@ -55,6 +60,7 @@
 
 <script>
 export default {
+  name: "GuestChat",
   props: {
     hotelId: { type: [String, Number], required: true },
     roomId: { type: [String, Number], required: true },
@@ -72,8 +78,6 @@ export default {
   }),
   computed: {
     me() {
-      // sender string to match your reception format "Reception:Name"
-      // We’ll use "{roomId}:Guest" so reception can pretty-print it
       return `${this.roomId}:${this.guestName}`;
     },
     msgTopic() {
@@ -86,17 +90,16 @@ export default {
       return `chat/hotel/${this.hotelId}/room/${String(this.roomId)}/ack`;
     },
     typingNames() {
-      // Show “Reception” etc.
       return [...this.typingSet].map(this.prettyUser);
     },
   },
-  async mounted() {
+  mounted() {
     // Subscribe to messages in this room
     this.msgUnsub = this.$mqtt.sub(this.msgTopic, (m) => {
       if (!m) return;
       this.upsertMessage(m);
 
-      // If message is from reception, acknowledge as seen
+      // If from reception, mark as seen
       if (m.role === "reception") {
         this.$nextTick(() => {
           this.scrollToEnd();
@@ -125,7 +128,7 @@ export default {
       this.$forceUpdate();
     });
 
-    // Subscribe to ACKs (so guest can mark own messages as seen✓✓)
+    // Subscribe to ACKs (mark our own messages as seen ✓✓)
     this.ackUnsub = this.$mqtt.sub(this.ackTopic, (ack) => {
       const { lastSeenId } = ack || {};
       if (!lastSeenId) return;
@@ -136,8 +139,7 @@ export default {
       });
     });
 
-    // Optionally load history here (if you have an API):
-    // await this.loadHistory();
+    // Optional: await this.loadHistory();
   },
   beforeDestroy() {
     this.msgUnsub && this.msgUnsub();
@@ -146,7 +148,6 @@ export default {
     Object.values(this._typingTimers || {}).forEach((t) => clearTimeout(t));
   },
   methods: {
-    // Optional: load last N messages
     async loadHistory() {
       try {
         const q = `?hotelId=${this.hotelId}&roomId=${this.roomId}&limit=50`;
@@ -155,34 +156,20 @@ export default {
         this.$nextTick(this.scrollToEnd);
       } catch (_) {}
     },
-
     upsertMessage(msg) {
       const i = this.messages.findIndex((x) => x.id === msg.id);
       if (i === -1) this.messages.push(msg);
       else this.$set(this.messages, i, { ...this.messages[i], ...msg });
     },
-
     prettyUser(u) {
-      const [rid, name] = String(u || "").split(":");
+      const [_, name] = String(u || "").split(":");
       return name || u;
     },
     prettySender(s) {
-      // Show “Reception” or “Guest”
       if (!s) return "";
       if (String(s).startsWith("Reception:")) return "Reception";
-      const [rid, name] = String(s).split(":");
+      const [_, name] = String(s).split(":");
       return name || "Guest";
-    },
-
-    bubble(m) {
-      const mine = m.role === "guest";
-      return {
-        maxWidth: "85%",
-        marginLeft: mine ? "auto" : "0",
-        background: mine ? "#e3f2fd" : "#f5f5f5",
-        borderRadius: "14px",
-        padding: "8px 12px",
-      };
     },
     time(ts) {
       return new Date(ts).toLocaleTimeString();
@@ -191,14 +178,12 @@ export default {
       const el = this.$refs.list;
       if (el) el.scrollTop = el.scrollHeight;
     },
-
     onKey(e) {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         this.send();
       }
     },
-
     sendTyping() {
       this.$mqtt.pub(this.typingTopic, {
         user: this.me,
@@ -214,7 +199,6 @@ export default {
         });
       }, 1200);
     },
-
     send() {
       const text = this.draft.trim();
       if (!text) return;
@@ -230,16 +214,11 @@ export default {
       this.upsertMessage(m);
       this.draft = "";
       this.$nextTick(this.scrollToEnd);
-      // Optionally ack own message (not required)
       this.ack(m.id);
     },
-
     async sendFile(e) {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
-
-      // You likely want to upload to your server and then publish the URL.
-      // Below is a minimal example using a presumed API:
       try {
         const form = new FormData();
         form.append("file", file);
@@ -267,9 +246,7 @@ export default {
         e.target.value = "";
       }
     },
-
     ack(id) {
-      // Tell reception what we’ve seen
       this.$mqtt.pub(this.ackTopic, {
         user: this.me,
         lastSeenId: id,
@@ -279,3 +256,141 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+/* Define theme vars on component root (works with scoped) */
+.wa-chat {
+  --wa-bg: #e5ddd5; /* wallpaper base */
+  --wa-me: #dcf8c6; /* my (guest) bubble */
+  --wa-them: #ffffff; /* reception bubble */
+  --wa-accent: #25d366; /* send button */
+  --wa-read: #34b7f1; /* blue double tick */
+  --wa-text: #111b21;
+  --wa-sub: #667781;
+
+  height: calc(100vh - 50px);
+  display: flex;
+  flex-direction: column;
+  color: var(--wa-text, #111b21);
+}
+
+/* Messages area */
+.chat-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 16px;
+  background-color: var(--wa-bg, #e5ddd5);
+  /* background-image: url("https://i.imgur.com/VrQ1S7G.png"); */
+  background-repeat: repeat;
+  background-size: 400px;
+  border: 1px solid #e3e3e3;
+  border-radius: 8px;
+}
+
+/* Rows */
+.msg {
+  display: flex;
+  margin: 8px 0;
+}
+.msg.them {
+  justify-content: flex-start;
+}
+.msg.me {
+  justify-content: flex-end;
+}
+
+/* Bubbles */
+.bubble {
+  position: relative;
+  max-width: 78%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  line-height: 1.35;
+  background: var(--wa-them, #ffffff);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+}
+.msg.me .bubble {
+  background: var(--wa-me, #dcf8c6);
+}
+
+/* Bubble tails */
+.msg.them .bubble:after,
+.msg.me .bubble:after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+}
+.msg.them .bubble:after {
+  left: -6px;
+  border-right-color: var(--wa-them, #ffffff);
+  border-left: 0;
+  border-bottom: 0;
+}
+.msg.me .bubble:after {
+  right: -6px;
+  border-left-color: var(--wa-me, #dcf8c6);
+  border-right: 0;
+  border-bottom: 0;
+}
+
+/* Meta + ticks */
+.meta {
+  font-size: 11px;
+  color: var(--wa-sub, #667781);
+  margin-bottom: 4px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.meta .sender {
+  font-weight: 500;
+}
+.ticks {
+  margin-left: 4px;
+}
+.ticks.read {
+  color: var(--wa-read, #34b7f1);
+}
+
+/* Typing line */
+.typing {
+  font-size: 12px;
+  color: var(--wa-sub, #667781);
+  margin-top: 6px;
+}
+
+/* Composer */
+.composer {
+  display: flex;
+  gap: 8px;
+}
+.input {
+  border: 1px solid #e3e3e3;
+  border-radius: 8px;
+  padding: 10px 12px;
+  outline: none;
+}
+.input:focus {
+  border-color: #c9c9c9;
+}
+
+/* WA green send button */
+.send-btn {
+  background: var(--wa-accent, #25d366);
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+}
+.send-btn:hover {
+  filter: brightness(0.96);
+}
+.send-btn:active {
+  transform: translateY(1px);
+}
+</style>
