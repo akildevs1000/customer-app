@@ -3,28 +3,22 @@ import Vue from "vue";
 import mqtt from "mqtt/dist/mqtt.min.js";
 
 const WS_URL = "wss://mqtt.xtremeguard.org:8084"; // e.g. ws://emqx.local:8083/mqtt
-
-// MQTT wildcard matcher: supports + and # (single/multi level)
+// MQTT wildcard matcher: supports + and #
 function topicMatches(filter, topic) {
-  // fast path: exact string
   if (filter === topic) return true;
-
   const f = filter.split("/");
   const t = topic.split("/");
-
   for (let i = 0; i < f.length; i++) {
     const fi = f[i];
     const ti = t[i];
-
-    if (fi === "#") return true; // multi-level wildcard
+    if (fi === "#") return true;
     if (fi === "+") {
       if (ti == null) return false;
       continue;
-    } // single-level
-    if (ti == null) return false; // topic shorter than filter
-    if (fi !== ti) return false; // literal mismatch
+    }
+    if (ti == null) return false;
+    if (fi !== ti) return false;
   }
-  // if filter ends, topic must also end (unless filter had '#')
   return f[f.length - 1] === "#" || f.length === t.length;
 }
 
@@ -38,7 +32,7 @@ export default (_ctx, inject) => {
     connectTimeout: 10000,
     clean: true,
     clientId: "hotelchat_" + Math.random().toString(16).slice(2),
-    // username, password if needed
+    // username: "user", password: "pass",
   });
 
   const api = {
@@ -49,18 +43,16 @@ export default (_ctx, inject) => {
         { qos: 1 },
         (err) => err && console.error("sub", filter, err)
       );
+
       const handler = (topic, payload) => {
         if (!topicMatches(filter, topic)) return;
         let data = null;
         try {
           data = JSON.parse(payload.toString());
-        } catch (_) {
-          /* allow non-JSON if you want: data = payload.toString(); */
-        }
+        } catch (_) {}
         cb(data, topic);
       };
       client.on("message", handler);
-      // return unsubscribe fn for this specific handler
       return () => client.off("message", handler);
     },
     pub(topic, msg) {
