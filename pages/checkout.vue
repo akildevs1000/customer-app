@@ -16,80 +16,123 @@
         <span>Orders List </span>
 
         <v-spacer></v-spacer>
-        Total Price {{ cartGrandTotalAmount }}
+        <!-- Total Price {{ cartGrandTotalAmount }} -->
       </v-card-title>
       <v-card-text class="pa-0 pt-2" style="font-size: 12px">
-        <v-expansion-panels inset>
-          <v-expansion-panel
-            v-for="(items, datetime) in cartItems"
-            :key="datetime"
-            v-model="panels"
-          >
-            <v-expansion-panel-header
-              >{{ datetime }} -
-              <v-spacer
-                >Total Items ({{ items.length }})</v-spacer
-              ></v-expansion-panel-header
-            >
-            <v-expansion-panel-content style="width: 100%">
-              <v-row :key="index2" v-for="(item, index2) in items" class="pt-2">
-                <v-col cols="1" style="padding-right: 0px">
-                  {{ index2 + 1 }}
-                </v-col>
-                <v-col class="text-center">
-                  <!-- <img
-                    class="p-5 boxshadow"
-                    :src="item.food.item_picture"
-                    width="50px"
-                    style="
-                      border: 1px solid #ddd;
-                      max-width: 100%;
-                      height: 40px;
-                      border-radius: 10px;
-                      object-fit: cover;
-                      cursor: pointer;
-                    "
-                  /> -->
-                  <div>{{ item.item }}</div>
-                </v-col>
-                <v-col cols="4" class="pl-0 pr-0" flex>
-                  <div style="font-size: 12px">
-                    {{ item.qty }}
-                    <v-icon color="green">mdi-alpha-x-box</v-icon>
-                    {{ item.single_amt }}
+        <AssetsTable
+          height="300"
+          :headers="[
+            {
+              text: `#`,
+              value: `sno`,
+              align: `left`,
+            },
+            // {
+            //   text: `Room`,
+            //   value: `room`,
+            //   align: `center`,
+            // },
+            {
+              text: `Date & Time`,
+              value: `posting_date`,
+              align: `center`,
+            },
+            // {
+            //   text: `Room Type`,
+            //   value: `room_type`,
+            //   align: `center`,
+            // },
 
-                    {{ item.tax }}
+            {
+              text: `Name`,
+              value: `name`,
+              align: `left`,
+            },
+            {
+              text: `Qty`,
+              value: `qty`,
+              align: `center`,
+            },
+            // {
+            //   text: `Price`,
+            //   value: `price`,
+            //   align: `center`,
+            // },
+            {
+              text: `Amount`,
+              value: `amount`,
+              align: `right`,
+            },
+            {
+              text: `GST`,
+              value: `gst`,
+              align: `right`,
+            },
 
-                    <v-icon color="green">mdi-chevron-right</v-icon>
-                    {{ item.amount_with_tax.toFixed(2) }}
-                  </div>
-                </v-col>
-                <v-col cols="3" class="flex">
-                  <div v-if="item.status == 0">--</div>
-                  <div v-else-if="item.status == 1" style="color: #93ab6d">
-                    Preparing
-                  </div>
-                  <div v-else-if="item.status == 2" style="color: green">
-                    Served
-                  </div>
-                  <div v-else-if="item.status == 3" style="color: red">
-                    Cancelled
-                  </div>
-                </v-col>
-                <v-col cols="1">
-                  <v-icon
-                    @click="cancelItem(item)"
-                    title="Click to Cancel the Item"
-                    v-if="item.status == 0"
-                    color="red"
-                    >mdi mdi-close-circle</v-icon
-                  >
-                </v-col>
-              </v-row>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
+            // {
+            //   text: `Cgst`,
+            //   value: `cgst`,
+            //   align: `right`,
+            // },
 
+            {
+              text: `Total`,
+              value: `total`,
+              align: `right`,
+            },
+
+            // {
+            //   text: ``,
+            //   value: `action`,
+            //   align: `center`,
+            //   width: `10px`,
+            // },
+          ]"
+          :items="cartItems"
+        >
+          <template #sno="{ item }">
+            {{ cartItems.indexOf(item) + 1 }}
+          </template>
+
+          <template #posting_date="{ item }">
+            {{ $dateFormat.format4(item.posting_date) || "---" }}
+          </template>
+
+          <template #name="{ item }">
+            {{ item.item }}
+          </template>
+          <template #qty="{ item }">
+            {{ item.qty }} X
+            {{ $utils.currency_format(item.single_amt) || "---" }}
+          </template>
+          <template #price="{ item }"> </template>
+          <template #amount="{ item }">
+            {{ $utils.currency_format(item.amount) || "---" }}
+          </template>
+          <template #gst="{ item }">
+            {{ $utils.currency_format(item.tax) || "---" }}
+          </template>
+
+          <template #total="{ item }">
+            <div style="font-weight: bold">
+              {{ $utils.currency_format(item.amount_with_tax) || "---" }}
+            </div>
+          </template>
+        </AssetsTable>
+        <v-row
+          ><v-col class="text-right bold pa-5" style="font-size: 20px">
+            Total : {{ cartGrandTotalAmount }}
+          </v-col></v-row
+        >
+
+        <v-btn
+          @click="checkOut()"
+          style="width: 100%; margin-top: 100px"
+          dark
+          filled
+          color="red"
+          >Check Out</v-btn
+        >
         <!-- <v-row>
           <v-col cols="4" style="color: red; font-size: 12px"> </v-col>
           <v-col cols="4" style="font-weight: bold; text-align: center"
@@ -197,6 +240,8 @@ export default {
       this.$axios
         .get(`get-posting-by-booking-id-and-room-id`, options)
         .then(({ data }) => {
+          console.log("data", data);
+
           this.cartItems = data;
           this.calculateTotal();
 
@@ -207,22 +252,16 @@ export default {
       this.totals = {};
       this.cartGrandTotalAmount = 0; // reset before loop
       let panelCount = 0;
-      for (let datetime in this.cartItems) {
-        this.panels.push(panelCount++);
-        const items = this.cartItems[datetime];
-        let groupTotal = 0;
 
-        for (let i = 0; i < items.length; i++) {
-          const order = items[i];
-          groupTotal += order.food_price * order.qty;
-        }
+      let groupTotal = 0;
 
-        // store total per datetime
-        this.$set(this.totals, datetime, groupTotal.toFixed(2));
-
-        // add to grand total
-        this.cartGrandTotalAmount += groupTotal;
+      for (let i = 0; i < this.cartItems.length; i++) {
+        const order = this.cartItems[i];
+        groupTotal += parseFloat(order.amount_with_tax, 2);
       }
+
+      // add to grand total
+      this.cartGrandTotalAmount += groupTotal;
 
       // round final total
       this.cartGrandTotalAmount = this.cartGrandTotalAmount.toFixed(2);
@@ -308,6 +347,12 @@ export default {
     },
     viewCart() {
       this.cartItemDialog = true;
+    },
+
+    checkOut() {
+      if (confirm("Are you sure want to Checkout Room? ")) {
+        //send message to Receiption
+      }
     },
   },
 };

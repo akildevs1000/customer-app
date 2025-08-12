@@ -22,3 +22,4 @@ Testing Test
 
 $ npm install vue2-datepicker --save
 
+npm i mqtt@4.3.8
