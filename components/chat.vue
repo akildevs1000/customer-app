@@ -1,7 +1,7 @@
 <template>
   <div class="wa-chat max-w-xl mx-auto">
     <div class="mb-2 text-sm text-gray-600">
-      Hotel {{ hotelId }} · Room {{ roomId }}
+      Hotel {{ hotelId }} · Room {{ bookingId }}
     </div>
 
     <!-- Messages -->
@@ -39,19 +39,20 @@
     </div>
 
     <!-- Composer -->
-    <div class="composer mt-3 flex gap-2">
+    <div class="composer mt-3 flex1 gap-2">
       <input
         v-model="draft"
         @keydown="onKey"
         @input="sendTyping"
-        class="flex-1 input"
         placeholder="Write a message…"
+        style="border: 1px solid black; width: 100%"
       />
       <button class="send-btn" @click="send">Send</button>
     </div>
 
     <!-- Optional: File upload -->
-    <div class="mt-2 flex items-center gap-2">
+    <div class="mt-6 flex items-center gap-2">
+      <br />
       <input type="file" @change="sendFile" />
       <small class="text-gray-500">Optional: send a file</small>
     </div>
@@ -63,7 +64,10 @@ export default {
   name: "GuestChat",
   props: {
     hotelId: { type: [String, Number], required: true },
+    bookingId: { type: [String, Number], required: true },
     roomId: { type: [String, Number], required: true },
+    roomNumber: { type: [String, Number], required: true },
+
     guestName: { type: String, default: "Guest" },
   },
   data: () => ({
@@ -78,16 +82,18 @@ export default {
   }),
   computed: {
     me() {
-      return `${this.roomId}:${this.guestName}`;
+      return `${this.bookingId}:${this.guestName}`;
     },
     msgTopic() {
-      return `chat/hotel/${this.hotelId}/room/${String(this.roomId)}/message`;
+      return `chat/hotel/${this.hotelId}/room/${String(
+        this.bookingId
+      )}/message`;
     },
     typingTopic() {
-      return `chat/hotel/${this.hotelId}/room/${String(this.roomId)}/typing`;
+      return `chat/hotel/${this.hotelId}/room/${String(this.bookingId)}/typing`;
     },
     ackTopic() {
-      return `chat/hotel/${this.hotelId}/room/${String(this.roomId)}/ack`;
+      return `chat/hotel/${this.hotelId}/room/${String(this.bookingId)}/ack`;
     },
     typingNames() {
       return [...this.typingSet].map(this.prettyUser);
@@ -150,7 +156,7 @@ export default {
   methods: {
     async loadHistory() {
       try {
-        const q = `?hotelId=${this.hotelId}&roomId=${this.roomId}&limit=50`;
+        const q = `?hotelId=${this.hotelId}&bookingId=${this.bookingId}&limit=50`;
         const rows = (await this.$axios.$get(`/api/chat/history${q}`)) || [];
         this.messages = rows;
         this.$nextTick(this.scrollToEnd);
@@ -199,14 +205,18 @@ export default {
         });
       }, 1200);
     },
-    send() {
+    async send() {
       const text = this.draft.trim();
       if (!text) return;
-      const m = {
+      let m = {
         id: Date.now() + "_" + Math.random().toString(36).slice(2),
         sender: this.me,
         role: "guest",
         type: "text",
+        booking_id: this.bookingId,
+
+        type: "text",
+
         text,
         ts: Date.now(),
       };
@@ -215,6 +225,19 @@ export default {
       this.draft = "";
       this.$nextTick(this.scrollToEnd);
       this.ack(m.id);
+
+      //store backup
+      try {
+        m = {
+          room_id: 11,
+          room_number: this.roomNumber,
+
+          receiption_name: "receiption_name",
+          ...m,
+        };
+
+        await this.$axios.post(`/chat_messages`, m);
+      } catch (e) {}
     },
     async sendFile(e) {
       const file = e.target.files && e.target.files[0];
@@ -223,7 +246,7 @@ export default {
         const form = new FormData();
         form.append("file", file);
         form.append("hotelId", this.hotelId);
-        form.append("roomId", this.roomId);
+        form.append("bookingId", this.bookingId);
         const res = await this.$axios.$post("/api/chat/upload", form);
         const url = res && res.url;
 
@@ -285,6 +308,7 @@ export default {
   background-size: 400px;
   border: 1px solid #e3e3e3;
   border-radius: 8px;
+  height: calc(100vh - 100px);
 }
 
 /* Rows */
@@ -368,10 +392,10 @@ export default {
   gap: 8px;
 }
 .input {
-  border: 1px solid #e3e3e3;
+  border: 1px solid black;
   border-radius: 8px;
   padding: 10px 12px;
-  outline: none;
+  /* outline: none; */
 }
 .input:focus {
   border-color: #c9c9c9;
