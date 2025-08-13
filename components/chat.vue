@@ -190,7 +190,9 @@ export default {
     },
     prettySender(s) {
       if (!s) return "";
-      if (String(s).startsWith("Reception:")) return "Reception";
+      if (String(s).startsWith("Reception:")) return s;
+
+      return "Me (" + s + ")";
       const [_, name] = String(s).split(":");
       return name || "Guest";
     },
