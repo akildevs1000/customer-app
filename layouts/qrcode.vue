@@ -36,12 +36,10 @@
         <v-col class="text-left" cols="4">
           <v-row no-gutters>
             <v-col cols="8">
-              <div style="font-size: 11px" class="text-center text-color">
-                <span class="text-color">
-                  {{ $dateFormat.dmy(new Date()) }}</span
-                >
+              <div style="font-size: 11px" class="text-center">
+                <span> {{ $dateFormat.dmy(new Date()) }}</span>
                 <br />
-                <span class="text-color"> {{ currentTime }}</span>
+                <span> {{ currentTime }}</span>
               </div>
             </v-col>
           </v-row>
@@ -50,14 +48,19 @@
         <!-- Center title -->
         <v-col class="text-center" cols="4">
           <img src="/login/login-logo.png" style="width: 100%" />
-          <br />
+
           <span class="text-color">
-            {{
-              $auth?.user?.company?.name < 10
-                ? $auth?.user?.company?.name
-                : $auth?.user?.company?.name.slice(0, 1) + " & Co"
-            }}
+            {{ $auth?.user?.company?.name }}
           </span>
+        </v-col>
+        <v-col style="font-size: 14px; text-align: center">
+          Hi,
+          {{
+            customerName.length > 15
+              ? customerName.substring(0, 15) + "..."
+              : customerName
+          }}
+          <div><v-icon size="18">mdi-tag</v-icon>{{ roomNumber }}</div>
         </v-col>
       </v-row>
     </v-app-bar>
@@ -214,12 +217,18 @@ export default {
     currentTime: "00:00:00",
     drawer: false,
     group: null,
+    roomNumber: "",
+    customerName: "",
   }),
   auth: false,
   mounted() {
     setInterval(() => {
       this.currentTime = new Date().toLocaleTimeString([], { hour12: false });
     }, 1000);
+
+    this.roomNumber = localStorage.getItem("hotelQrcodeRoomNumber") || "---";
+    this.customerName =
+      localStorage.getItem("hotelQrcodeCustomerName") || "---";
   },
   watch: {
     group() {

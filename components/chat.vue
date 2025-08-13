@@ -1,8 +1,6 @@
 <template>
-  <div class="wa-chat max-w-xl mx-auto">
-    <div class="mb-2 text-sm text-gray-600">
-      Hotel {{ hotelId }} · Room {{ bookingId }}
-    </div>
+  <div class="wa-chat max-w-xl mx-auto mt-5">
+    <div class="mb-2 text-sm text-gray-600">Room {{ roomNumber }}</div>
 
     <!-- Messages -->
     <div ref="list" class="chat-body">
@@ -62,14 +60,15 @@
 <script>
 export default {
   name: "GuestChat",
-  props: {
-    hotelId: { type: [String, Number], required: true },
-    bookingId: { type: [String, Number], required: true },
-    roomId: { type: [String, Number], required: true },
-    roomNumber: { type: [String, Number], required: true },
+  props: ["hotelId", "bookingId", "roomId", "roomNumber", "guestName"],
+  // props: {
 
-    guestName: { type: String, default: "Guest" },
-  },
+  //   // hotelId: { type: [String, Number], required: true },
+  //   // bookingId: { type: [String, Number], required: true },
+  //   // roomId: { type: [String, Number], required: true },
+  //   // roomNumber: { type: [String, Number], required: true },
+  //   // guestName: { type: String, default: "Guest" },
+  // },
   data: () => ({
     messages: [],
     draft: "",
@@ -79,21 +78,25 @@ export default {
     ackUnsub: null,
     _t: null, // typing debounce
     _typingTimers: {}, // auto-clear for typing state
+    timezone: "Asia/Kolkata",
   }),
   computed: {
     me() {
-      return `${this.bookingId}:${this.guestName}`;
+      return `${this.roomNumber}:${this.guestName}`;
+      //return `${this.bookingId}:${this.bookingId}`;
     },
     msgTopic() {
       return `chat/hotel/${this.hotelId}/room/${String(
-        this.bookingId
+        this.roomNumber
       )}/message`;
     },
     typingTopic() {
-      return `chat/hotel/${this.hotelId}/room/${String(this.bookingId)}/typing`;
+      return `chat/hotel/${this.hotelId}/room/${String(
+        this.roomNumber
+      )}/typing`;
     },
     ackTopic() {
-      return `chat/hotel/${this.hotelId}/room/${String(this.bookingId)}/ack`;
+      return `chat/hotel/${this.hotelId}/room/${String(this.roomNumber)}/ack`;
     },
     typingNames() {
       return [...this.typingSet].map(this.prettyUser);
@@ -146,6 +149,20 @@ export default {
     });
 
     // Optional: await this.loadHistory();
+
+    if (this.$auth.user.company?.timezone) {
+      this.timezone = this.$auth.user.company.timezone.utc_time_zone;
+    }
+
+    // this.currentTime = new Intl.DateTimeFormat("en-US", {
+    //   timeZone: timezone, // Specify the desired timezone
+    //   hour: "2-digit",
+    //   minute: "2-digit",
+    //   second: "2-digit",
+    //   hour12: false, // 24-hour format
+    // }).format(new Date());
+
+    // const now = new Date();
   },
   beforeDestroy() {
     this.msgUnsub && this.msgUnsub();

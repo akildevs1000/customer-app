@@ -1,10 +1,39 @@
 <template>
-  <Chat :hotelId="3" :bookingId="1205" :roomId="1205" :roomNumber="1205" />
+  <div>
+    <Chat
+      v-if="company_id"
+      :hotelId="company_id"
+      :bookingId="bookingId"
+      :roomId="roomId"
+      :roomNumber="roomNumber"
+      :guestName="CustomerName"
+    />
+  </div>
 </template>
 <script>
 import Chat from "../components/chat.vue";
 
 export default {
+  layout: "qrcode",
   components: { Chat },
+
+  data() {
+    return {
+      company_id: null,
+      bookingId: null,
+      roomId: null,
+      roomNumber: null,
+      CustomerName: null,
+    };
+  },
+  mounted() {
+    this.company_id = this.$auth.user.company_id;
+    this.bookingId = localStorage.getItem("hotelQrcodeCompanyId");
+    this.roomId = localStorage.getItem("hotelQrcodeRoomId");
+    this.roomNumber = localStorage.getItem("hotelQrcodeRoomNumber");
+    this.CustomerName = localStorage.getItem("hotelQrcodeCustomerName");
+  },
+
+  created() {},
 };
 </script>

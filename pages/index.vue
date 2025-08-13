@@ -276,7 +276,10 @@ export default {
             localStorage.setItem("hotelQrcodeRoomNumber", room_no);
             localStorage.setItem("hotelQrcodeRoomId", room_id);
             localStorage.setItem("customer_id", customer.id);
-
+            localStorage.setItem(
+              "hotelQrcodeCustomerName",
+              customer.title + " " + customer.full_name
+            );
             localStorage.setItem(
               "hotelQrcodeBookingId",
               data.record.booking_id
