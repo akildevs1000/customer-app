@@ -87,22 +87,20 @@ export default {
     },
     msgTopic() {
       return `chat/hotel/${this.hotelId}/room/${String(
-        this.roomNumber
+        this.bookingId
       )}/message`;
     },
     typingTopic() {
-      return `chat/hotel/${this.hotelId}/room/${String(
-        this.roomNumber
-      )}/typing`;
+      return `chat/hotel/${this.hotelId}/room/${String(this.bookingId)}/typing`;
     },
     ackTopic() {
-      return `chat/hotel/${this.hotelId}/room/${String(this.roomNumber)}/ack`;
+      return `chat/hotel/${this.hotelId}/room/${String(this.bookingId)}/ack`;
     },
     typingNames() {
       return [...this.typingSet].map(this.prettyUser);
     },
   },
-  mounted() {
+  async mounted() {
     // Subscribe to messages in this room
     this.msgUnsub = this.$mqtt.sub(this.msgTopic, (m) => {
       if (!m) return;
@@ -149,6 +147,7 @@ export default {
     });
 
     // Optional: await this.loadHistory();
+    await this.loadHistory();
 
     if (this.$auth.user.company?.timezone) {
       this.timezone = this.$auth.user.company.timezone.utc_time_zone;
@@ -173,9 +172,10 @@ export default {
   methods: {
     async loadHistory() {
       try {
-        const q = `?hotelId=${this.hotelId}&bookingId=${this.bookingId}&limit=50`;
-        const rows = (await this.$axios.$get(`/api/chat/history${q}`)) || [];
-        this.messages = rows;
+        const q = `?company_id=${this.hotelId}&bookingId=${this.bookingId}&limit=50`;
+        const rows =
+          (await this.$axios.get(`/chat_messages_history${q}`)) || [];
+        this.messages = rows.data;
         this.$nextTick(this.scrollToEnd);
       } catch (_) {}
     },
