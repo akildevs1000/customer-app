@@ -14,13 +14,14 @@
           <div class="meta">
             <span class="sender">{{ prettySender(m.sender) }}</span>
             <span>· {{ time(m.ts) }}</span>
-            <span
+            <!-- <span
               v-if="m.role === 'guest'"
               class="ticks"
               :class="{ read: m.seen }"
             >
               {{ m.seen ? "✓✓" : "✓" }}
-            </span>
+            </span> -->
+            <!-- <span v-if="m.role === 'guest'" class="ticks"> ✓ </span> -->
           </div>
 
           <div v-if="m.type === 'text'">{{ m.text }}</div>
@@ -31,9 +32,9 @@
         </div>
       </div>
 
-      <div v-if="typingNames.length" class="typing">
+      <!-- <div v-if="typingNames.length" class="typing">
         {{ typingNames.join(", ") }} typing…
-      </div>
+      </div> -->
     </div>
 
     <!-- Composer -->
@@ -61,14 +62,7 @@
 export default {
   name: "GuestChat",
   props: ["hotelId", "bookingId", "roomId", "roomNumber", "guestName"],
-  // props: {
 
-  //   // hotelId: { type: [String, Number], required: true },
-  //   // bookingId: { type: [String, Number], required: true },
-  //   // roomId: { type: [String, Number], required: true },
-  //   // roomNumber: { type: [String, Number], required: true },
-  //   // guestName: { type: String, default: "Guest" },
-  // },
   data: () => ({
     messages: [],
     draft: "",
@@ -138,6 +132,9 @@ export default {
     // Subscribe to ACKs (mark our own messages as seen ✓✓)
     this.ackUnsub = this.$mqtt.sub(this.ackTopic, (ack) => {
       const { lastSeenId } = ack || {};
+
+      console.log(lastSeenId);
+
       if (!lastSeenId) return;
       this.messages.forEach((x, idx) => {
         if (x.id === lastSeenId && x.role === "guest" && !x.seen) {
@@ -152,16 +149,6 @@ export default {
     if (this.$auth.user.company?.timezone) {
       this.timezone = this.$auth.user.company.timezone.utc_time_zone;
     }
-
-    // this.currentTime = new Intl.DateTimeFormat("en-US", {
-    //   timeZone: timezone, // Specify the desired timezone
-    //   hour: "2-digit",
-    //   minute: "2-digit",
-    //   second: "2-digit",
-    //   hour12: false, // 24-hour format
-    // }).format(new Date());
-
-    // const now = new Date();
   },
   beforeDestroy() {
     this.msgUnsub && this.msgUnsub();
@@ -176,7 +163,9 @@ export default {
         const rows =
           (await this.$axios.get(`/chat_messages_history${q}`)) || [];
         this.messages = rows.data;
-        this.$nextTick(this.scrollToEnd);
+        setTimeout(() => {
+          this.scrollToEnd();
+        }, 1000 * 2);
       } catch (_) {}
     },
     upsertMessage(msg) {
