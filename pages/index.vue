@@ -254,89 +254,81 @@ export default {
         },
       };
       this.loading = true;
-      this.$axios
-        .get(`get_checkin_customer_data`, options)
-        .then(({ data }) => {
-          this.otp_sent = true;
+      this.$axios.get(`get_checkin_customer_data`, options).then(({ data }) => {
+        this.otp_sent = true;
 
-          if (data.status) {
-            this.whatsapp_otp = data.record.whatsapp_otp;
-            const { company_id, room_no, room_id } = params;
-            const customer = data.record.customer;
-            if (data.record.checkout_guest_request)
-              localStorage.setItem(
-                "checkout_request_datetime",
-                data.record.checkout_guest_request
-              );
-
-            this.room_number = room_no;
-
-            // Commit data to the store
-            // this.$store.commit("hotelQrcodeCompanyId", company_id);
-            // this.$store.commit("hotelQrcodeRoomNumber", room_no);
-            // this.$store.commit("hotelQrcodeRoomId", room_id);
-            // this.$store.commit("customer_id", customer.id);
-            // this.$store.commit("hotelQrcodeWhatsappNumber", customer.whatsapp);
-
-            localStorage.setItem("hotelQrcodeCompanyId", company_id);
-            localStorage.setItem("hotelQrcodeRoomNumber", room_no);
-            localStorage.setItem("hotelQrcodeRoomId", room_id);
-            localStorage.setItem("customer_id", customer.id);
+        if (data.status) {
+          this.whatsapp_otp = data.record.whatsapp_otp;
+          const { company_id, room_no, room_id } = params;
+          const customer = data.record.customer;
+          if (data.record.checkout_guest_request)
             localStorage.setItem(
-              "hotelQrcodeBookingId",
-              customer.record.booking_id
+              "checkout_request_datetime",
+              data.record.checkout_guest_request
             );
 
-            localStorage.setItem(
-              "hotelQrcodeCustomerName",
-              customer.title + " " + customer.full_name
-            );
-            localStorage.setItem("hotelQrcodeBookingRoomId", data.record.id);
-            localStorage.setItem(
-              "hotelQrcodeWhatsappNumber",
-              customer.whatsapp
-            );
+          this.room_number = room_no;
 
-            // Update component state
-            this.customer_otp = this.whatsapp_otp;
-            this.loading = false;
+          // Commit data to the store
+          // this.$store.commit("hotelQrcodeCompanyId", company_id);
+          // this.$store.commit("hotelQrcodeRoomNumber", room_no);
+          // this.$store.commit("hotelQrcodeRoomId", room_id);
+          // this.$store.commit("customer_id", customer.id);
+          // this.$store.commit("hotelQrcodeWhatsappNumber", customer.whatsapp);
 
-            // Store data in localStorage
-            const storageData = {
-              hotelQrcodeCompanyId: company_id,
-              hotelQrcodeRoomNumber: room_no,
-              hotelQrcodeRoomId: room_id,
-              hotelQrcodeBookingRoomId: data.record.id,
-              customer_id: customer.id,
-            };
+          localStorage.setItem("hotelQrcodeCompanyId", company_id);
+          localStorage.setItem("hotelQrcodeRoomNumber", room_no);
+          localStorage.setItem("hotelQrcodeRoomId", room_id);
+          localStorage.setItem("customer_id", customer.id);
+          localStorage.setItem("hotelQrcodeBookingId", data.record.booking_id);
 
-            Object.entries(storageData).forEach(([key, value]) => {
-              localStorage.setItem(key, value);
-            });
+          localStorage.setItem(
+            "hotelQrcodeCustomerName",
+            customer.title + " " + customer.full_name
+          );
+          localStorage.setItem("hotelQrcodeBookingRoomId", data.record.id);
+          localStorage.setItem("hotelQrcodeWhatsappNumber", customer.whatsapp);
 
-            // Set component properties
-            this.whatsapp_number = customer.whatsapp;
-            this.profilePic =
-              customer.image || process.env.APP_URL + "/noimage.png";
-            this.customerName = `${customer.title}. ${customer.full_name}`;
+          // Update component state
+          this.customer_otp = this.whatsapp_otp;
+          this.loading = false;
 
-            this.pageValid = true;
-          } else if (data.status == false) {
-            this.loading = false;
-            this.message =
-              "Check-in Details are not Found.Please scan QR code again Sorry for the inconvenience";
-            alert(this.message);
-          }
+          // Store data in localStorage
+          const storageData = {
+            hotelQrcodeCompanyId: company_id,
+            hotelQrcodeRoomNumber: room_no,
+            hotelQrcodeRoomId: room_id,
+            hotelQrcodeBookingRoomId: data.record.id,
+            customer_id: customer.id,
+          };
 
-          setTimeout(() => {
-            this.loadingStep1 = false;
-          }, 3000);
-        })
-        .catch((e) => {
+          Object.entries(storageData).forEach(([key, value]) => {
+            localStorage.setItem(key, value);
+          });
+
+          // Set component properties
+          this.whatsapp_number = customer.whatsapp;
+          this.profilePic =
+            customer.image || process.env.APP_URL + "/noimage.png";
+          this.customerName = `${customer.title}. ${customer.full_name}`;
+
+          this.pageValid = true;
+        } else if (data.status == false) {
+          this.loading = false;
           this.message =
             "Check-in Details are not Found.Please scan QR code again Sorry for the inconvenience";
           alert(this.message);
-        });
+        }
+
+        setTimeout(() => {
+          this.loadingStep1 = false;
+        }, 3000);
+      });
+      // .catch((e) => {
+      //   this.message =
+      //     "Check-in Details are not Found.Please scan QR code again Sorry for the inconvenience".e;
+      //   alert(this.message);
+      // });
 
       setTimeout(() => {
         this.loading = false;

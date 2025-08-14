@@ -29,7 +29,7 @@ export default {
     };
   },
   mounted() {
-    this.company_id = this.$auth.user.company_id;
+    this.company_id = localStorage.getItem("hotelQrcodeCompanyId");
     this.bookingId = localStorage.getItem("hotelQrcodeBookingId");
     this.bookingRoomId = localStorage.getItem("hotelQrcodeBookingRoomId");
 

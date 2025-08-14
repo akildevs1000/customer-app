@@ -181,7 +181,7 @@ export default {
     confirmToOrder() {
       let options = {
         params: {
-          company_id: this.$auth.user.company_id,
+          company_id: this.company_id,
           cart_items: this.cartItems,
           room_id: this.room_id,
           booking_id: this.booking_id,

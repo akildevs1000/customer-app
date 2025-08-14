@@ -124,15 +124,27 @@
             Total : {{ cartGrandTotalAmount }}
           </v-col></v-row
         >
+        <v-row
+          ><v-col class="text-center">
+            <v-btn
+              v-if="
+                !checkout_request_datetime ||
+                checkout_request_datetime == 'null'
+              "
+              @click="checkOut()"
+              style="width: 100%; margin-top: 100px"
+              dark
+              filled
+              color="red"
+              >Check Out</v-btn
+            >
 
-        <v-btn
-          @click="checkOut()"
-          style="width: 100%; margin-top: 100px"
-          dark
-          filled
-          color="red"
-          >Check Out</v-btn
+            <v-chip v-else color="red" style="color: #fff; text-align: center">
+              Checkout is Requested at {{ checkout_request_datetime }}
+            </v-chip></v-col
+          ></v-row
         >
+
         <!-- <v-row>
           <v-col cols="4" style="color: red; font-size: 12px"> </v-col>
           <v-col cols="4" style="font-weight: bold; text-align: center"
@@ -197,15 +209,19 @@ export default {
     loading: false,
     pageValid: false,
     panels: [],
+    checkout_request_datetime: null,
   }),
   auth: false,
   mounted() {
     if (localStorage) {
       this.company_id = localStorage.getItem("hotelQrcodeCompanyId");
       this.room_id = localStorage.getItem("hotelQrcodeRoomId");
-      this.booking_id = localStorage.getItem("hotelQrcodeBookingId");
+      this.booking_id = localStorage.getItem("hotelQrcodeBookingRoomId");
       this.room_number = localStorage.getItem("hotelQrcodeRoomNumber");
       this.pageValid = localStorage.getItem("hotelQRCodeOTPverified");
+      this.checkout_request_datetime = localStorage.getItem(
+        "checkout_request_datetime"
+      );
 
       this.getOrderedList();
     } else {
@@ -236,7 +252,7 @@ export default {
           room_id: this.room_id,
         },
       };
-      this.loading = true;
+      // this.loading = true;
       this.$axios
         .get(`get-posting-by-booking-id-and-room-id`, options)
         .then(({ data }) => {
@@ -305,7 +321,7 @@ export default {
           room_number: this.room_number,
         },
       };
-      this.loading = true;
+      // this.loading = true;
       await this.$axios
         .post(`hotel_orders_food_items`, options.params)
         .then(({ data }) => {
@@ -333,7 +349,7 @@ export default {
           company_id: company_id,
         },
       };
-      this.loading = true;
+      // this.loading = true;
       await this.$axios
         .get(`company/${company_id}`, options)
         .then(({ data }) => {
@@ -351,7 +367,42 @@ export default {
 
     checkOut() {
       if (confirm("Are you sure want to Checkout Room? ")) {
-        //send message to Receiption
+        let options = {
+          params: {
+            company_id: this.company_id,
+            booking_id: this.booking_id,
+            room_id: this.room_id,
+          },
+        };
+        // this.loading = true;
+        this.$axios
+          .post(`/hotel_orders_checkout_request`, options.params)
+          .then(({ data }) => {
+            if (data.status) {
+              this.snackbar = true;
+              this.checkout_request_datetime = data.record;
+              // this.checkout_request_datetime = new Date().toLocaleString(
+              //   "en-US",
+              //   {
+              //     year: "numeric",
+              //     month: "2-digit",
+              //     day: "2-digit",
+              //     hour: "2-digit",
+              //     minute: "2-digit",
+              //   }
+              // );
+
+              localStorage.setItem(
+                "checkout_request_datetime",
+                this.checkout_request_datetime
+              );
+              this.snackbarMessage = data.message;
+            } else {
+              this.snackbar = true;
+              this.snackbarMessage = data.message;
+            }
+          });
+        this.loading = false;
       }
     },
   },

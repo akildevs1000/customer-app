@@ -30,6 +30,7 @@
         background: #8888ff;
       }
     </style>
+
     <v-app-bar fixed app dense flat>
       <v-row align="center" no-gutters>
         <!-- Left side with location and date -->
@@ -253,3 +254,4 @@ export default {
   object-fit: cover;
 }
 </style>
+<style src="@/assets/css/chatStyles.css"></style>
