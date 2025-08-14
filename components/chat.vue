@@ -61,7 +61,14 @@
 <script>
 export default {
   name: "GuestChat",
-  props: ["hotelId", "bookingId", "roomId", "roomNumber", "guestName"],
+  props: [
+    "hotelId",
+    "bookingId",
+    "bookingRoomId",
+    "roomId",
+    "roomNumber",
+    "guestName",
+  ],
 
   data: () => ({
     messages: [],
@@ -77,18 +84,22 @@ export default {
   computed: {
     me() {
       return `${this.roomNumber}:${this.guestName}`;
-      //return `${this.bookingId}:${this.bookingId}`;
+      //return `${this.bookingRoomId}:${this.bookingRoomId}`;
     },
     msgTopic() {
       return `chat/hotel/${this.hotelId}/room/${String(
-        this.bookingId
+        this.bookingRoomId
       )}/message`;
     },
     typingTopic() {
-      return `chat/hotel/${this.hotelId}/room/${String(this.bookingId)}/typing`;
+      return `chat/hotel/${this.hotelId}/room/${String(
+        this.bookingRoomId
+      )}/typing`;
     },
     ackTopic() {
-      return `chat/hotel/${this.hotelId}/room/${String(this.bookingId)}/ack`;
+      return `chat/hotel/${this.hotelId}/room/${String(
+        this.bookingRoomId
+      )}/ack`;
     },
     typingNames() {
       return [...this.typingSet].map(this.prettyUser);
@@ -159,7 +170,7 @@ export default {
   methods: {
     async loadHistory() {
       try {
-        const q = `?company_id=${this.hotelId}&bookingId=${this.bookingId}&limit=50`;
+        const q = `?company_id=${this.hotelId}&bookingRoomId=${this.bookingRoomId}&limit=50`;
         const rows =
           (await this.$axios.get(`/chat_messages_history${q}`)) || [];
         this.messages = rows.data;
@@ -222,11 +233,13 @@ export default {
         role: "guest",
         type: "text",
         booking_id: this.bookingId,
-
+        booking_room_id: this.bookingRoomId,
         type: "text",
-
         text,
         ts: Date.now(),
+        room_id: this.roomId,
+        room_number: this.roomNumber,
+        company_id: this.hotelId,
       };
       this.$mqtt.pub(this.msgTopic, m);
       this.upsertMessage(m);
@@ -236,13 +249,14 @@ export default {
 
       //store backup
       try {
-        m = {
-          room_id: 11,
-          room_number: this.roomNumber,
+        // m = {
+        //   room_id: roomId,
+        //   room_number: this.roomNumber,
+        //   company_id: this.company_id,
 
-          receiption_name: "receiption_name",
-          ...m,
-        };
+        //   // receiption_name: "receiption_name",
+        //   ...m,
+        // };
 
         await this.$axios.post(`/chat_messages`, m);
       } catch (e) {}
@@ -254,7 +268,7 @@ export default {
         const form = new FormData();
         form.append("file", file);
         form.append("hotelId", this.hotelId);
-        form.append("bookingId", this.bookingId);
+        form.append("bookingRoomId", this.bookingRoomId);
         const res = await this.$axios.$post("/api/chat/upload", form);
         const url = res && res.url;
 

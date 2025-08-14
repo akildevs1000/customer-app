@@ -263,6 +263,12 @@ export default {
             this.whatsapp_otp = data.record.whatsapp_otp;
             const { company_id, room_no, room_id } = params;
             const customer = data.record.customer;
+            if (data.record.checkout_guest_request)
+              localStorage.setItem(
+                "checkout_request_datetime",
+                data.record.checkout_guest_request
+              );
+
             this.room_number = room_no;
 
             // Commit data to the store
@@ -277,13 +283,15 @@ export default {
             localStorage.setItem("hotelQrcodeRoomId", room_id);
             localStorage.setItem("customer_id", customer.id);
             localStorage.setItem(
+              "hotelQrcodeBookingId",
+              customer.record.booking_id
+            );
+
+            localStorage.setItem(
               "hotelQrcodeCustomerName",
               customer.title + " " + customer.full_name
             );
-            localStorage.setItem(
-              "hotelQrcodeBookingId",
-              data.record.booking_id
-            );
+            localStorage.setItem("hotelQrcodeBookingRoomId", data.record.id);
             localStorage.setItem(
               "hotelQrcodeWhatsappNumber",
               customer.whatsapp
@@ -298,7 +306,7 @@ export default {
               hotelQrcodeCompanyId: company_id,
               hotelQrcodeRoomNumber: room_no,
               hotelQrcodeRoomId: room_id,
-              hotelQrcodeBookingId: data.record.booking_id,
+              hotelQrcodeBookingRoomId: data.record.id,
               customer_id: customer.id,
             };
 

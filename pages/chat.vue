@@ -3,6 +3,7 @@
     <Chat
       v-if="company_id"
       :hotelId="company_id"
+      :bookingRoomId="bookingRoomId"
       :bookingId="bookingId"
       :roomId="roomId"
       :roomNumber="roomNumber"
@@ -24,11 +25,14 @@ export default {
       roomId: null,
       roomNumber: null,
       CustomerName: null,
+      bookingRoomId: null,
     };
   },
   mounted() {
     this.company_id = this.$auth.user.company_id;
-    this.bookingId = localStorage.getItem("hotelQrcodeCompanyId");
+    this.bookingId = localStorage.getItem("hotelQrcodeBookingId");
+    this.bookingRoomId = localStorage.getItem("hotelQrcodeBookingRoomId");
+
     this.roomId = localStorage.getItem("hotelQrcodeRoomId");
     this.roomNumber = localStorage.getItem("hotelQrcodeRoomNumber");
     this.CustomerName = localStorage.getItem("hotelQrcodeCustomerName");

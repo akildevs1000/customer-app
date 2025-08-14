@@ -167,7 +167,7 @@ export default {
       // this.getCompanyDetails(localStorage.getItem("hotelQrcodeCompanyId"));
       this.company_id = localStorage.getItem("hotelQrcodeCompanyId");
       this.room_id = localStorage.getItem("hotelQrcodeRoomId");
-      this.booking_id = localStorage.getItem("hotelQrcodeBookingId");
+      this.booking_id = localStorage.getItem("hotelQrcodeBookingRoomId");
       this.room_number = localStorage.getItem("hotelQrcodeRoomNumber");
       this.pageValid = localStorage.getItem("hotelQRCodeOTPverified");
     } else {
