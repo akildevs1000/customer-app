@@ -29,7 +29,8 @@
 
           <div v-if="m.type === 'text'">{{ m.text }}</div>
           <a v-else-if="m.type === 'file'" :href="m.url" target="_blank">
-            {{ m.filename || "file" }}
+            <!-- {{ m.filename || "file" }} -->
+            Image
           </a>
           <audio v-else-if="m.type === 'audio'" :src="m.url" controls></audio>
         </div>
@@ -52,15 +53,16 @@
       />
       <button class="send-btn" @click="send">Send</button>
     </div>
-    <br />
-    <br />
-    <br />
+    <!--  -->
     <!-- Optional: File upload -->
-    <!-- <div class="mt-6 flex items-center gap-2">
+    <div class="mt-6 flex items-center gap-2">
       <br />
       <input type="file" @change="sendFile" />
       <small class="text-gray-500">Optional: send a file</small>
-    </div> -->
+    </div>
+    <br />
+    <br />
+    <br />
   </div>
 </template>
 
@@ -271,24 +273,38 @@ export default {
     },
     async sendFile(e) {
       const file = e.target.files && e.target.files[0];
+
+      console.log(file);
+
       if (!file) return;
       try {
         const form = new FormData();
         form.append("file", file);
-        form.append("hotelId", this.hotelId);
-        form.append("bookingRoomId", this.bookingRoomId);
-        const res = await this.$axios.$post("/api/chat/upload", form);
-        const url = res && res.url;
+        form.append("sender", this.me);
+        form.append("role", "guest");
+        form.append("type", "file");
+        form.append("ts", Date.now());
+
+        form.append("booking_id", this.bookingId);
+        form.append("booking_room_id", this.bookingRoomId);
+        form.append("room_id", this.roomId);
+        form.append("room_number", this.roomNumber);
+        form.append("company_id", this.hotelId);
+
+        const res = await this.$axios.post("/chat_messages_upload_file", form);
+
+        const url = res && res.data.message;
 
         const m = {
           id: Date.now() + "_" + Math.random().toString(36).slice(2),
           sender: this.me,
           role: "guest",
           type: "file",
-          url,
-          filename: file.name,
+          url: url,
+          filename: "image",
           ts: Date.now(),
         };
+
         this.$mqtt.pub(this.msgTopic, m);
         this.upsertMessage(m);
         this.$nextTick(this.scrollToEnd);

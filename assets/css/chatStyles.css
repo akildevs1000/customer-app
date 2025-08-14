@@ -1,0 +1,137 @@
+
+/* Define theme vars on component root (works with scoped) */
+.wa-chat {
+  --wa-bg: #e5ddd5; /* wallpaper base */
+  --wa-me: #dcf8c6; /* my (guest) bubble */
+  --wa-them: #ffffff; /* reception bubble */
+  --wa-accent: #25d366; /* send button */
+  --wa-read: #34b7f1; /* blue double tick */
+  --wa-text: #111b21;
+  --wa-sub: #667781;
+
+  height: calc(100vh - 50px);
+  display: flex;
+  flex-direction: column;
+  color: var(--wa-text, #111b21);
+}
+
+/* Messages area */
+.chat-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 16px;
+  background-color: var(--wa-bg, #e5ddd5);
+  /* background-image: url("https://i.imgur.com/VrQ1S7G.png"); */
+  background-repeat: repeat;
+  background-size: 400px;
+  border: 1px solid #e3e3e3;
+  border-radius: 8px;
+  height: calc(100vh - 100px);
+}
+
+/* Rows */
+.msg {
+  display: flex;
+  margin: 8px 0;
+}
+.msg.them {
+  justify-content: flex-start;
+}
+.msg.me {
+  justify-content: flex-end;
+}
+
+/* Bubbles */
+.bubble {
+  position: relative;
+  max-width: 78%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  line-height: 1.35;
+  background: var(--wa-them, #ffffff);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+}
+.msg.me .bubble {
+  background: var(--wa-me, #dcf8c6);
+}
+
+/* Bubble tails */
+.msg.them .bubble:after,
+.msg.me .bubble:after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+}
+.msg.them .bubble:after {
+  left: -6px;
+  border-right-color: var(--wa-them, #ffffff);
+  border-left: 0;
+  border-bottom: 0;
+}
+.msg.me .bubble:after {
+  right: -6px;
+  border-left-color: var(--wa-me, #dcf8c6);
+  border-right: 0;
+  border-bottom: 0;
+}
+
+/* Meta + ticks */
+.meta {
+  font-size: 11px;
+  color: var(--wa-sub, #667781);
+  margin-bottom: 4px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.meta .sender {
+  font-weight: 500;
+}
+.ticks {
+  margin-left: 4px;
+}
+.ticks.read {
+  color: var(--wa-read, #34b7f1);
+}
+
+/* Typing line */
+.typing {
+  font-size: 12px;
+  color: var(--wa-sub, #667781);
+  margin-top: 6px;
+}
+
+/* Composer */
+.composer {
+  display: flex;
+  gap: 8px;
+}
+.input {
+  border: 1px solid black;
+  border-radius: 8px;
+  padding: 10px 12px;
+  /* outline: none; */
+}
+.input:focus {
+  border-color: #c9c9c9;
+}
+
+/* WA green send button */
+.send-btn {
+  background: var(--wa-accent, #25d366);
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+}
+.send-btn:hover {
+  filter: brightness(0.96);
+}
+.send-btn:active {
+  transform: translateY(1px);
+}
