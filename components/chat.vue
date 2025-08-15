@@ -86,7 +86,12 @@
             </a> -->
           </div>
 
-          <audio v-else-if="m.type === 'audio'" :src="m.url" controls></audio>
+          <audio
+            controlsList="nodownload"
+            v-else-if="m.type === 'audio'"
+            :src="m.url"
+            controls
+          ></audio>
         </div>
       </div>
 
@@ -106,11 +111,36 @@
         style="border: 1px solid black; width: 100%"
       />
       <v-icon
-        :color="selectedFile ? 'green' : ''"
+        size="20"
+        style="color: black"
+        :color="selectedFile ? 'blue' : ''"
         left
         @click="$refs.fileInput.click()"
         >mdi-paperclip</v-icon
       >
+      <div>
+        <v-icon
+          size="20"
+          style="color: black; margin-top: 4px"
+          @click="startRec"
+          v-if="!recording"
+          :disabled="recording"
+          >mdi-microphone</v-icon
+        >
+        <span v-else :style="recording ? 'width:100px' : 'width:50px'">
+          <v-icon
+            class="flex"
+            size="20"
+            color="red"
+            @click="stopRec"
+            :disabled="!recording"
+            style="color: red; margin-top: 4px"
+            >mdi-microphone</v-icon
+          >
+
+          <span v-if="recording">{{ seconds }}s</span>
+        </span>
+      </div>
       <button class="send-btn" @click="send">Send</button>
       <div v-if="selectedFile">
         File
@@ -118,6 +148,7 @@
           >mdi-delete-circle-outline</v-icon
         >
       </div>
+
       <input
         style="display: none"
         type="file"
@@ -158,6 +189,12 @@ export default {
   ],
 
   data: () => ({
+    mediaRecorder: null,
+    chunks: [],
+    recording: false,
+    startTs: null,
+    seconds: 0,
+    tmr: null,
     messages: [],
     draft: "",
     typingSet: new Set(), // who is typing (reception)
@@ -514,6 +551,122 @@ export default {
         ts: this.getSecondsInTimezone(this.timezone),
         tsDb: Date.now(),
       });
+    },
+
+    async startRec() {
+      // Pick best supported mime for the browser
+      const candidates = [
+        "audio/webm;codecs=opus",
+        "audio/webm",
+        "audio/mp4", // iOS Safari will end up giving m4a
+      ];
+      let mimeType = "";
+      for (const c of candidates) {
+        if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(c)) {
+          mimeType = c;
+          break;
+        }
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      this.mediaRecorder = new MediaRecorder(
+        stream,
+        mimeType ? { mimeType } : {}
+      );
+      this.chunks = [];
+      this.mediaRecorder.ondataavailable = (e) =>
+        e.data.size && this.chunks.push(e.data);
+      this.mediaRecorder.start();
+      this.recording = true;
+      this.startTs = Date.now();
+      this.seconds = 0;
+      this.tmr = setInterval(
+        () => (this.seconds = Math.round((Date.now() - this.startTs) / 1000)),
+        200
+      );
+    },
+
+    async stopRec() {
+      if (!this.mediaRecorder) return;
+      await new Promise((res) => {
+        this.mediaRecorder.onstop = res;
+        this.mediaRecorder.stop();
+      });
+      clearInterval(this.tmr);
+      // Stop all mic tracks so the browser icon goes away
+      if (this.mediaRecorder.stream) {
+        this.mediaRecorder.stream.getTracks().forEach((track) => track.stop());
+      }
+      this.recording = false;
+
+      const blob = new Blob(this.chunks, {
+        type: this.mediaRecorder.mimeType || "audio/webm",
+      });
+      const durationMs = Date.now() - this.startTs;
+
+      // 1) Upload via HTTP
+      const form = new FormData();
+      // form.append("file", file);
+      form.append("sender", this.me);
+      form.append("role", "guest");
+      form.append("type", "audio");
+      form.append("ts", Date.now());
+
+      form.append("booking_id", this.bookingId);
+      form.append("booking_room_id", this.bookingRoomId);
+      form.append("room_id", this.roomId);
+      form.append("room_number", this.roomNumber);
+      form.append("company_id", this.hotelId);
+      form.append("durationMs", durationMs.toString());
+      form.append(
+        "file",
+        blob,
+        `voice_${this.bookingRoomId}.${this.fileExt(blob.type)}`
+      );
+
+      const res = await this.$axios.post("chat_messages_upload_file", form);
+      // data => { url, mime, size, durationMs }
+      const url = res && res.data.message.url;
+      const id = res.data.message.id;
+
+      if (url == "null") {
+        alert("File Upload Failed");
+
+        return false;
+      }
+      const m = {
+        id: id, //Date.now() + "_" + Math.random().toString(36).slice(2),
+        sender: this.me,
+        role: "guest",
+        type: "audio",
+        url: url,
+        filename: "image",
+        ts: this.getSecondsInTimezone(this.timezone),
+        tsDb: Date.now(),
+        booking_id: this.bookingId,
+        booking_room_id: this.bookingRoomId,
+        room_id: this.roomId,
+        room_number: this.roomNumber,
+        company_id: this.hotelId,
+        audio: url,
+      };
+
+      this.$mqtt.pub(this.msgTopic, m);
+      this.upsertMessage(m);
+      this.$nextTick(this.scrollToEnd);
+      this.ack(m.id);
+    },
+
+    fileExt(mime) {
+      if (
+        mime.includes("mp4") ||
+        mime.includes("x-m4a") ||
+        mime.includes("aac")
+      )
+        return "m4a";
+      if (mime.includes("webm")) return "webm";
+      if (mime.includes("ogg")) return "ogg";
+      return "dat";
     },
   },
 };
