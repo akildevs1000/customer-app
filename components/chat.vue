@@ -48,18 +48,28 @@
         v-model="draft"
         @keydown="onKey"
         @input="sendTyping"
-        placeholder="Write a message…"
+        placeholder=" Write a message…"
         style="border: 1px solid black; width: 100%"
       />
+      <v-icon left @click="$refs.fileInput.click()">mdi-paperclip</v-icon>
       <button class="send-btn" @click="send">Send</button>
+
+      <input type="file" ref="fileInput" @change="handleFileSelect" />
     </div>
-    <!--  -->
-    <!-- Optional: File upload -->
-    <div class="mt-6 flex items-center gap-2">
-      <br />
-      <input type="file" @change="sendFile" />
-      <small class="text-gray-500">Optional: send a file</small>
-    </div>
+    <!-- <div class="mt-6 flex items-center gap-2">
+      <v-row
+        ><v-col
+          ><input type="file" ref="fileInput" @change="handleFileSelect"
+        /></v-col>
+        <v-col cols="4" class="text-right">
+          <button class="send-btn" small @click="sendFile">
+            <v-icon left @click="$refs.fileInput.click()">mdi-paperclip</v-icon>
+            Send File
+          </button>
+        </v-col>
+      </v-row>
+
+       </div> -->
     <br />
     <br />
     <br />
@@ -88,6 +98,7 @@ export default {
     _t: null, // typing debounce
     _typingTimers: {}, // auto-clear for typing state
     timezone: "Asia/Kolkata",
+    selectedFile: null,
   }),
   computed: {
     me() {
@@ -168,8 +179,9 @@ export default {
     // if (this.$auth.user.company?.timezone) {
     //   this.timezone = this.$auth.user.company.timezone.utc_time_zone;
     // }
-
-    this.$refs.messageInput.focus();
+    try {
+      this.$refs.messageInput.focus();
+    } catch (e) {}
   },
   beforeDestroy() {
     this.msgUnsub && this.msgUnsub();
@@ -178,6 +190,10 @@ export default {
     Object.values(this._typingTimers || {}).forEach((t) => clearTimeout(t));
   },
   methods: {
+    handleFileSelect(event) {
+      this.selectedFile = event.target.files[0] || null;
+      console.log("Selected file:", this.selectedFile?.name);
+    },
     async loadHistory() {
       try {
         const q = `?company_id=${this.hotelId}&booking_room_id=${this.bookingRoomId}&limit=50`;
@@ -207,7 +223,36 @@ export default {
       return name || "Guest";
     },
     time(ts) {
-      return new Date(ts).toLocaleTimeString();
+      const date = new Date(ts);
+      const now = new Date();
+
+      // Check if same day
+      const isToday =
+        date.getDate() === now.getDate() &&
+        date.getMonth() === now.getMonth() &&
+        date.getFullYear() === now.getFullYear();
+
+      if (isToday) {
+        // Only show time
+        return date.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      } else {
+        // Show date + time
+        return (
+          date.toLocaleDateString([], {
+            month: "short",
+            day: "numeric",
+            year: "numeric", // valid values: "numeric" or "2-digit"
+          }) +
+          " " +
+          date.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        );
+      }
     },
     scrollToEnd() {
       const el = this.$refs.list;
@@ -223,18 +268,24 @@ export default {
       this.$mqtt.pub(this.typingTopic, {
         user: this.me,
         typing: true,
-        ts: Date.now(),
+        ts: this.getSecondsInTimezone(this.timezone),
+        tsDb: Date.now(),
       });
       clearTimeout(this._t);
       this._t = setTimeout(() => {
         this.$mqtt.pub(this.typingTopic, {
           user: this.me,
           typing: false,
-          ts: Date.now(),
+          ts: this.getSecondsInTimezone(this.timezone),
+          tsDb: Date.now(),
         });
       }, 1200);
     },
     async send() {
+      if (this.selectedFile) {
+        this.sendFile();
+      }
+
       const text = this.draft.trim();
       if (!text) return;
       let m = {
@@ -242,11 +293,11 @@ export default {
         sender: this.me,
         role: "guest",
         type: "text",
+        text,
+        ts: this.getSecondsInTimezone(this.timezone),
+        tsDb: Date.now(),
         booking_id: this.bookingId,
         booking_room_id: this.bookingRoomId,
-        type: "text",
-        text,
-        ts: Date.now(),
         room_id: this.roomId,
         room_number: this.roomNumber,
         company_id: this.hotelId,
@@ -271,10 +322,16 @@ export default {
         await this.$axios.post(`/chat_messages`, m);
       } catch (e) {}
     },
-    async sendFile(e) {
-      const file = e.target.files && e.target.files[0];
+    async sendFile() {
+      if (!this.selectedFile) {
+        //alert("Please select a file first");
+        return;
+      }
 
-      console.log(file);
+      const file = this.selectedFile;
+      // const file = e.target.files && e.target.files[0];
+
+      // console.log(file);
 
       if (!file) return;
       try {
@@ -302,7 +359,13 @@ export default {
           type: "file",
           url: url,
           filename: "image",
-          ts: Date.now(),
+          ts: this.getSecondsInTimezone(this.timezone),
+          tsDb: Date.now(),
+          booking_id: this.bookingId,
+          booking_room_id: this.bookingRoomId,
+          room_id: this.roomId,
+          room_number: this.roomNumber,
+          company_id: this.hotelId,
         };
 
         this.$mqtt.pub(this.msgTopic, m);
@@ -312,14 +375,51 @@ export default {
       } catch (err) {
         console.error("Upload failed", err);
       } finally {
-        e.target.value = "";
+        // e.target.value = "";
+        this.$refs.fileInput.value = ""; // reset input
       }
+
+      this.selectedFile = null; // reset after upload
+      this.$refs.fileInput.value = ""; // reset input
+
+      console.log("selectedFile", this.selectedFile);
+    },
+    getSecondsInTimezone(timeZone) {
+      // Current UTC timestamp (ms)
+      const now = new Date();
+
+      // Format the time in the target timezone
+      const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      });
+
+      // Extract date/time parts
+      const parts = {};
+      formatter.formatToParts(now).forEach(({ type, value }) => {
+        parts[type] = value;
+      });
+
+      // Build a date string as if it's local time in that timezone
+      const localTimeString = `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:${parts.second}`;
+
+      console.log(localTimeString);
+
+      // Parse that string as if it's UTC (to get correct epoch seconds for that timezone clock time)
+      return Math.floor(new Date(localTimeString).getTime());
     },
     ack(id) {
       this.$mqtt.pub(this.ackTopic, {
         user: this.me,
         lastSeenId: id,
-        ts: Date.now(),
+        ts: this.getSecondsInTimezone(this.timezone),
+        tsDb: Date.now(),
       });
     },
   },
