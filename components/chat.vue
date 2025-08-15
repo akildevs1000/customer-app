@@ -1,7 +1,42 @@
 <template>
   <div class="wa-chat max-w-xl mx-auto mt-5">
     <div class="mb-2 text-sm text-gray-600">Room {{ roomNumber }}</div>
+    <v-dialog
+      v-model="DialogpreviewImage"
+      width="400px"
+      max-width="100%"
+      style="max-width: 100% !important; margin: 0px !important"
+    >
+      <v-card>
+        <v-card-title dense class="primary white--text background">
+          <span>
+            Image
+            <!-- Download
 
+            <a :href="previewImageUrl" download target="_blank">
+              <v-icon outlined dark color="white"> mdi-download-box </v-icon></a
+            > -->
+          </span>
+          <v-spacer> </v-spacer>
+          <v-spacer></v-spacer>
+
+          <v-icon
+            @click="DialogpreviewImage = false"
+            outlined
+            dark
+            color="white"
+          >
+            mdi mdi-close-circle
+          </v-icon>
+        </v-card-title>
+        <v-card-text style="" class="pt-2">
+          <img
+            :src="previewImageUrl"
+            style="width: 100%; border-radius: 10px; text-align: right"
+          />
+        </v-card-text>
+      </v-card>
+    </v-dialog>
     <!-- Messages -->
     <div ref="list" class="chat-body">
       <div class="flex" v-if="messages.length == 0">
@@ -28,10 +63,29 @@
           </div>
 
           <div v-if="m.type === 'text'">{{ m.text }}</div>
-          <a v-else-if="m.type === 'file'" :href="m.url" target="_blank">
-            <!-- {{ m.filename || "file" }} -->
-            Image
-          </a>
+
+          <div v-else-if="m.type === 'file'" style="text-align: center">
+            <img
+              :src="m.url"
+              @click="viewImage(m.id, m.url)"
+              style="
+                margin: auto;
+                width: 100px;
+                border-radius: 10px;
+                text-align: right;
+              "
+            />
+            <!-- <img
+              :src="m.url"
+              @click="downloadImage(m.id)"
+              style="width: 100px; border-radius: 10px; text-align: right"
+            /> -->
+            <!-- <a :href="m.url" target="_blank">
+                {{ m.filename || "file" }}
+              View
+            </a> -->
+          </div>
+
           <audio v-else-if="m.type === 'audio'" :src="m.url" controls></audio>
         </div>
       </div>
@@ -51,10 +105,25 @@
         placeholder=" Write a message…"
         style="border: 1px solid black; width: 100%"
       />
-      <v-icon left @click="$refs.fileInput.click()">mdi-paperclip</v-icon>
+      <v-icon
+        :color="selectedFile ? 'green' : ''"
+        left
+        @click="$refs.fileInput.click()"
+        >mdi-paperclip</v-icon
+      >
       <button class="send-btn" @click="send">Send</button>
-
-      <input type="file" ref="fileInput" @change="handleFileSelect" />
+      <div v-if="selectedFile">
+        File
+        <v-icon color="red" @click="selectedFile = null"
+          >mdi-delete-circle-outline</v-icon
+        >
+      </div>
+      <input
+        style="display: none"
+        type="file"
+        ref="fileInput"
+        @change="handleFileSelect"
+      />
     </div>
     <!-- <div class="mt-6 flex items-center gap-2">
       <v-row
@@ -99,6 +168,9 @@ export default {
     _typingTimers: {}, // auto-clear for typing state
     timezone: "Asia/Kolkata",
     selectedFile: null,
+    previewImageUrl: null,
+    DialogpreviewImage: null,
+    previewImageId: null,
   }),
   computed: {
     me() {
@@ -350,10 +422,17 @@ export default {
 
         const res = await this.$axios.post("/chat_messages_upload_file", form);
 
-        const url = res && res.data.message;
+        const url = res && res.data.message.url;
+        const id = res.data.message.id;
+
+        if (url == "null") {
+          alert("File Upload Failed");
+
+          return false;
+        }
 
         const m = {
-          id: Date.now() + "_" + Math.random().toString(36).slice(2),
+          id: id, //Date.now() + "_" + Math.random().toString(36).slice(2),
           sender: this.me,
           role: "guest",
           type: "file",
@@ -383,6 +462,20 @@ export default {
       this.$refs.fileInput.value = ""; // reset input
 
       console.log("selectedFile", this.selectedFile);
+    },
+    viewImage(messageId, url) {
+      this.previewImageId = messageId;
+      let $url = process.env.BACKEND_URL;
+      this.previewImageUrl = url;
+
+      this.DialogpreviewImage = true;
+    },
+    downloadImage() {
+      let $url = process.env.BACKEND_URL;
+      window.open(
+        `${$url}chat_download_image?id=${this.previewImageId}`,
+        "_blank"
+      );
     },
     getSecondsInTimezone(timeZone) {
       // Current UTC timestamp (ms)

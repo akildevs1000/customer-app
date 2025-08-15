@@ -89,6 +89,7 @@
 }
 .meta .sender {
   font-weight: 500;
+  color:#757575 !important;
 }
 .ticks {
   margin-left: 4px;
