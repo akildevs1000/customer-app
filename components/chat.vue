@@ -87,10 +87,11 @@
           </div>
 
           <audio
-            controlsList="nodownload"
             v-else-if="m.type === 'audio'"
             :src="m.url"
             controls
+            controlsList="nodownload"
+            preload="none"
           ></audio>
         </div>
       </div>
@@ -308,17 +309,22 @@ export default {
         const q = `?company_id=${this.hotelId}&booking_room_id=${this.bookingRoomId}&limit=50`;
         const rows =
           (await this.$axios.get(`/chat_messages_history${q}`)) || [];
-        this.messages = rows.data;
-        setTimeout(() => {
-          this.scrollToEnd();
-        }, 1000 * 2);
+        this.messages = (rows.data || []).sort(
+          (a, b) => (a.tsDb || 0) - (b.tsDb || 0)
+        );
+        this.$nextTick(this.scrollToEnd);
       } catch (_) {}
     },
     upsertMessage(msg) {
       const i = this.messages.findIndex((x) => x.id === msg.id);
       if (i === -1) this.messages.push(msg);
       else this.$set(this.messages, i, { ...this.messages[i], ...msg });
+
+      // keep ordered; then force a tick
+      this.messages.sort((a, b) => (a.tsDb || 0) - (b.tsDb || 0));
+      this.$nextTick(() => this.$forceUpdate()); // ✅ nudge the view
     },
+
     prettyUser(u) {
       const [_, name] = String(u || "").split(":");
       return name || u;
@@ -373,7 +379,7 @@ export default {
         this.send();
       }
     },
-    sendTyping() {
+    async sendTyping() {
       this.$mqtt.pub(this.typingTopic, {
         user: this.me,
         typing: true,
@@ -392,11 +398,12 @@ export default {
     },
     async send() {
       if (this.selectedFile) {
-        this.sendFile();
+        await this.sendFile();
       }
 
       const text = this.draft.trim();
       if (!text) return;
+
       let m = {
         id: Date.now() + "_" + Math.random().toString(36).slice(2),
         sender: this.me,
@@ -411,11 +418,16 @@ export default {
         room_number: this.roomNumber,
         company_id: this.hotelId,
       };
-      this.$mqtt.pub(this.msgTopic, m);
+
+      const payload = JSON.parse(JSON.stringify(m));
+      this.$mqtt.pub(this.msgTopic, payload); // ✅ publish a plain object
+      //this.$mqtt.pub(this.msgTopic, m);
       this.upsertMessage(m);
       this.draft = "";
       this.$nextTick(this.scrollToEnd);
       this.ack(m.id);
+
+      await this.sendTyping();
 
       //store backup
       try {
@@ -473,6 +485,7 @@ export default {
           sender: this.me,
           role: "guest",
           type: "file",
+
           url: url,
           filename: "image",
           ts: this.getSecondsInTimezone(this.timezone),
@@ -483,11 +496,13 @@ export default {
           room_number: this.roomNumber,
           company_id: this.hotelId,
         };
-
-        this.$mqtt.pub(this.msgTopic, m);
+        const payload = JSON.parse(JSON.stringify(m));
+        this.$mqtt.pub(this.msgTopic, payload); // ✅ publish a plain object
+        // this.$mqtt.pub(this.msgTopic, m);
         this.upsertMessage(m);
         this.$nextTick(this.scrollToEnd);
         this.ack(m.id);
+        await this.sendTyping();
       } catch (err) {
         console.error("Upload failed", err);
       } finally {
@@ -639,6 +654,7 @@ export default {
         sender: this.me,
         role: "guest",
         type: "audio",
+
         url: url,
         filename: "image",
         ts: this.getSecondsInTimezone(this.timezone),
@@ -650,11 +666,13 @@ export default {
         company_id: this.hotelId,
         audio: url,
       };
-
-      this.$mqtt.pub(this.msgTopic, m);
+      const payload = JSON.parse(JSON.stringify(m));
+      this.$mqtt.pub(this.msgTopic, payload); // ✅ publish a plain object
+      // this.$mqtt.pub(this.msgTopic, m);
       this.upsertMessage(m);
       this.$nextTick(this.scrollToEnd);
       this.ack(m.id);
+      await this.sendTyping();
     },
 
     fileExt(mime) {
