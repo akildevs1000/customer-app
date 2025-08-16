@@ -308,7 +308,7 @@ export default {
     },
     async loadHistory() {
       try {
-        const q = `?company_id=${this.hotelId}&booking_room_id=${this.bookingRoomId}&limit=50`;
+        const q = `?company_id=${this.hotelId}&role=guest&booking_room_id=${this.bookingRoomId}&limit=50`;
         const rows =
           (await this.$axios.get(`/chat_messages_history${q}`)) || [];
         this.messages = (rows.data || []).sort(
@@ -401,13 +401,15 @@ export default {
     async send() {
       if (this.selectedFile) {
         await this.sendFile();
+
+        return false;
       }
 
       const text = this.draft.trim();
       if (!text) return;
 
       let m = {
-        id: Date.now() + "_" + Math.random().toString(36).slice(2),
+        id: Date.now() + "_" + this.bookingRoomId,
         sender: this.me,
         role: "guest",
         type: "text",
@@ -484,7 +486,7 @@ export default {
         }
 
         const m = {
-          id: id, //Date.now() + "_" + Math.random().toString(36).slice(2),
+          id: Date.now() + "_" + this.bookingRoomId, //Date.now() + "_" + Math.random().toString(36).slice(2),
           sender: this.me,
           role: "guest",
           type: "file",
@@ -654,7 +656,7 @@ export default {
         return false;
       }
       const m = {
-        id: id, //Date.now() + "_" + Math.random().toString(36).slice(2),
+        id: Date.now() + "" + this.bookingRoomId, //Date.now() + "_" + Math.random().toString(36).slice(2),
         sender: this.me,
         role: "guest",
         type: "audio",
