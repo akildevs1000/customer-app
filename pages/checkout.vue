@@ -216,7 +216,9 @@ export default {
     if (localStorage) {
       this.company_id = localStorage.getItem("hotelQrcodeCompanyId");
       this.room_id = localStorage.getItem("hotelQrcodeRoomId");
-      this.booking_id = localStorage.getItem("hotelQrcodeBookingRoomId");
+      this.booking_id = localStorage.getItem("hotelQrcodeBookingId");
+      this.booking_room_id = localStorage.getItem("hotelQrcodeBookingRoomId");
+
       this.room_number = localStorage.getItem("hotelQrcodeRoomNumber");
       this.pageValid = localStorage.getItem("hotelQRCodeOTPverified");
       this.checkout_request_datetime = localStorage.getItem(
@@ -371,6 +373,8 @@ export default {
           params: {
             company_id: this.company_id,
             booking_id: this.booking_id,
+
+            booking_room_id: this.booking_room_id,
             room_id: this.room_id,
           },
         };
@@ -381,16 +385,16 @@ export default {
             if (data.status) {
               this.snackbar = true;
               this.checkout_request_datetime = data.record;
-              // this.checkout_request_datetime = new Date().toLocaleString(
-              //   "en-US",
-              //   {
-              //     year: "numeric",
-              //     month: "2-digit",
-              //     day: "2-digit",
-              //     hour: "2-digit",
-              //     minute: "2-digit",
-              //   }
-              // );
+              this.checkout_request_datetime = new Date().toLocaleString(
+                "en-US",
+                {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }
+              );
 
               localStorage.setItem(
                 "checkout_request_datetime",

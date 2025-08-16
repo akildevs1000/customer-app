@@ -245,6 +245,16 @@ export default {
     },
     clearDefaults() {
       localStorage.setItem("QRCodeCartItems", JSON.stringify([]));
+
+      localStorage.removeItem("checkout_request_datetime");
+      localStorage.removeItem("hotelQrcodeCompanyId");
+      localStorage.removeItem("hotelQrcodeRoomNumber");
+      localStorage.removeItem("hotelQrcodeRoomId");
+      localStorage.removeItem("customer_id");
+      localStorage.removeItem("hotelQrcodeBookingId");
+      localStorage.removeItem("hotelQrcodeCustomerName");
+      localStorage.removeItem("hotelQrcodeBookingRoomId");
+      localStorage.removeItem("hotelQrcodeWhatsappNumber");
     },
     getGuestDetails(params) {
       let options = {
@@ -261,20 +271,13 @@ export default {
           this.whatsapp_otp = data.record.whatsapp_otp;
           const { company_id, room_no, room_id } = params;
           const customer = data.record.customer;
+
+          this.room_number = room_no;
           if (data.record.checkout_guest_request)
             localStorage.setItem(
               "checkout_request_datetime",
               data.record.checkout_guest_request
             );
-
-          this.room_number = room_no;
-
-          // Commit data to the store
-          // this.$store.commit("hotelQrcodeCompanyId", company_id);
-          // this.$store.commit("hotelQrcodeRoomNumber", room_no);
-          // this.$store.commit("hotelQrcodeRoomId", room_id);
-          // this.$store.commit("customer_id", customer.id);
-          // this.$store.commit("hotelQrcodeWhatsappNumber", customer.whatsapp);
 
           localStorage.setItem("hotelQrcodeCompanyId", company_id);
           localStorage.setItem("hotelQrcodeRoomNumber", room_no);

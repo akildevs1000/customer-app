@@ -87,6 +87,7 @@
           </div>
 
           <audio
+            style="height: 28px"
             v-else-if="m.type === 'audio'"
             :src="m.url"
             controls
@@ -109,7 +110,7 @@
         @keydown="onKey"
         @input="sendTyping"
         placeholder=" Write a message…"
-        style="border: 1px solid black; width: 100%"
+        style="border: 1px solid black; width: 100%; border-radius: 5px"
       />
       <v-icon
         size="20"
@@ -119,7 +120,13 @@
         @click="$refs.fileInput.click()"
         >mdi-paperclip</v-icon
       >
-      <div>
+      <div v-if="selectedFile">
+        <!-- File -->
+        <v-icon color="red" @click="selectedFile = null"
+          >mdi-delete-circle-outline</v-icon
+        >
+      </div>
+      <div style="margin: auto">
         <v-icon
           size="20"
           style="color: black; margin-top: 4px"
@@ -128,7 +135,7 @@
           :disabled="recording"
           >mdi-microphone</v-icon
         >
-        <span v-else :style="recording ? 'width:100px' : 'width:50px'">
+        <span v-else :style="recording ? 'width:120px' : 'width:50px'">
           <v-icon
             class="flex"
             size="20"
@@ -143,15 +150,10 @@
         </span>
       </div>
       <button class="send-btn" @click="send">Send</button>
-      <div v-if="selectedFile">
-        File
-        <v-icon color="red" @click="selectedFile = null"
-          >mdi-delete-circle-outline</v-icon
-        >
-      </div>
 
       <input
         style="display: none"
+        accept="image/*"
         type="file"
         ref="fileInput"
         @change="handleFileSelect"
@@ -428,6 +430,7 @@ export default {
       this.ack(m.id);
 
       await this.sendTyping();
+      this.$nextTick(this.scrollToEnd);
 
       //store backup
       try {
@@ -503,6 +506,7 @@ export default {
         this.$nextTick(this.scrollToEnd);
         this.ack(m.id);
         await this.sendTyping();
+        this.$nextTick(this.scrollToEnd);
       } catch (err) {
         console.error("Upload failed", err);
       } finally {
@@ -673,6 +677,7 @@ export default {
       this.$nextTick(this.scrollToEnd);
       this.ack(m.id);
       await this.sendTyping();
+      this.$nextTick(this.scrollToEnd);
     },
 
     fileExt(mime) {
