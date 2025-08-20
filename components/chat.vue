@@ -51,7 +51,7 @@
         <div class="bubble">
           <div class="meta">
             <span class="sender">{{ prettySender(m.sender) }}</span>
-            <span>· {{ time(m.ts) }}</span>
+
             <!-- <span
               v-if="m.role === 'guest'"
               class="ticks"
@@ -94,6 +94,18 @@
             controlsList="nodownload"
             preload="none"
           ></audio>
+          <div
+            :style="
+              m.role === 'guest' ? 'text-align:right' : 'text-align:  left'
+            "
+          >
+            <span
+              class="sender"
+              style="padding-top: 5px; color: black; font-size: 10px"
+              ><v-icon size="16">mdi-clock-outline</v-icon>
+              {{ time(m.ts) }}</span
+            >
+          </div>
         </div>
       </div>
 
@@ -560,7 +572,7 @@ export default {
       // Build a date string as if it's local time in that timezone
       const localTimeString = `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:${parts.second}`;
 
-      console.log(localTimeString);
+      // console.log(localTimeString);
 
       // Parse that string as if it's UTC (to get correct epoch seconds for that timezone clock time)
       return Math.floor(new Date(localTimeString).getTime());
