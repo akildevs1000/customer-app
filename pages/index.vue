@@ -287,7 +287,7 @@ export default {
 
           localStorage.setItem(
             "hotelQrcodeCustomerName",
-            customer.title + " " + customer.full_name
+            customer.title + "." + this.$utils.capsTitle(customer.full_name)
           );
           localStorage.setItem("hotelQrcodeBookingRoomId", data.record.id);
           localStorage.setItem("hotelQrcodeWhatsappNumber", customer.whatsapp);

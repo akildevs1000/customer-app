@@ -1,16 +1,43 @@
 export default ({ app }, inject) => {
-
   inject("utils", {
     add_zeros(number) {
-      return number && number.toString().padStart(4, '0');
+      return number && number.toString().padStart(4, "0");
+    },
+    getSecondsInTimezone(timeZone) {
+      // Current UTC timestamp (ms)
+      const now = new Date();
 
+      // Format the time in the target timezone
+      const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      });
+
+      // Extract date/time parts
+      const parts = {};
+      formatter.formatToParts(now).forEach(({ type, value }) => {
+        parts[type] = value;
+      });
+
+      // Build a date string as if it's local time in that timezone
+      const localTimeString = `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:${parts.second}`;
+
+      // console.log(localTimeString);
+
+      // Parse that string as if it's UTC (to get correct epoch seconds for that timezone clock time)
+      return Math.floor(new Date(localTimeString).getTime());
     },
     convert_decimal(n) {
       if (n === +n && n !== (n | 0)) {
         return n.toFixed(2) + ".00".replace(".00.00", ".00");
       } else {
         return n + ".00".replace(".00.00", ".00");
-
       }
     },
     getSum(values) {
@@ -18,36 +45,73 @@ export default ({ app }, inject) => {
     },
     currency_format(n, type = "₹") {
       if (type == "₹") {
-        return parseFloat(n).toLocaleString('en-IN', { style: 'currency', currency: 'INR' });
+        return parseFloat(n).toLocaleString("en-IN", {
+          style: "currency",
+          currency: "INR",
+        });
       }
 
-      return parseFloat(n).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+      return parseFloat(n).toLocaleString("en-US", {
+        style: "currency",
+        currency: "USD",
+      });
     },
     numberToWords(num) {
       const belowTwenty = [
-        'Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
-        'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'
+        "Zero",
+        "One",
+        "Two",
+        "Three",
+        "Four",
+        "Five",
+        "Six",
+        "Seven",
+        "Eight",
+        "Nine",
+        "Ten",
+        "Eleven",
+        "Twelve",
+        "Thirteen",
+        "Fourteen",
+        "Fifteen",
+        "Sixteen",
+        "Seventeen",
+        "Eighteen",
+        "Nineteen",
       ];
       const tens = [
-        '', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'
+        "",
+        "",
+        "Twenty",
+        "Thirty",
+        "Forty",
+        "Fifty",
+        "Sixty",
+        "Seventy",
+        "Eighty",
+        "Ninety",
       ];
-      const thousands = ['', 'Thousand', 'Million', 'Billion'];
+      const thousands = ["", "Thousand", "Million", "Billion"];
 
-      if (num === 0) return 'Zero';
+      if (num === 0) return "Zero";
 
-      let words = '';
+      let words = "";
 
       function helper(n) {
-        if (n === 0) return '';
-        else if (n < 20) return belowTwenty[n] + ' ';
-        else if (n < 100) return tens[Math.floor(n / 10)] + ' ' + helper(n % 10);
-        else return belowTwenty[Math.floor(n / 100)] + ' Hundred ' + helper(n % 100);
+        if (n === 0) return "";
+        else if (n < 20) return belowTwenty[n] + " ";
+        else if (n < 100)
+          return tens[Math.floor(n / 10)] + " " + helper(n % 10);
+        else
+          return (
+            belowTwenty[Math.floor(n / 100)] + " Hundred " + helper(n % 100)
+          );
       }
 
       let i = 0;
       while (num > 0) {
         if (num % 1000 !== 0) {
-          words = helper(num % 1000) + thousands[i] + ' ' + words;
+          words = helper(num % 1000) + thousands[i] + " " + words;
         }
         num = Math.floor(num / 1000);
         i++;
@@ -59,8 +123,11 @@ export default ({ app }, inject) => {
       return `${title} ${first_name} ${last_name}`;
     },
     full_address({ city, state, country }) {
-      const formatValue = (value) => value && value !== "null" ? value : "---";
-      return `${formatValue(city)} ${formatValue(state)} ${formatValue(country)}`;
+      const formatValue = (value) =>
+        value && value !== "null" ? value : "---";
+      return `${formatValue(city)} ${formatValue(state)} ${formatValue(
+        country
+      )}`;
     },
     getRelatedClass(status_id) {
       let status = {
@@ -109,39 +176,66 @@ export default ({ app }, inject) => {
       const minutes = Math.floor((totalSeconds % 3600) / 60);
       const seconds = totalSeconds % 60;
 
-      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    }
+      return `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+    },
   });
 
   inject("dateFormat", {
     dmyhm() {
       const date = new Date(); // Current date and time
-      const day = String(date.getDate()).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, "0");
 
       // Get month abbreviation
-      const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+      const monthNames = [
+        "JAN",
+        "FEB",
+        "MAR",
+        "APR",
+        "MAY",
+        "JUN",
+        "JUL",
+        "AUG",
+        "SEP",
+        "OCT",
+        "NOV",
+        "DEC",
+      ];
       const month = monthNames[date.getMonth()];
 
       const year = date.getFullYear();
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
       return `${day} ${month} ${year} ${hours}:${minutes}`;
     },
 
     hm(custom_date) {
       const date = new Date(custom_date); // Current date and time
-      const day = String(date.getDate()).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, "0");
 
       // Get month abbreviation
-      const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+      const monthNames = [
+        "JAN",
+        "FEB",
+        "MAR",
+        "APR",
+        "MAY",
+        "JUN",
+        "JUL",
+        "AUG",
+        "SEP",
+        "OCT",
+        "NOV",
+        "DEC",
+      ];
       const month = monthNames[date.getMonth()];
 
       const year = date.getFullYear();
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
       return `${hours}:${minutes}`;
     },
-
 
     getMyDayOnly(originalData) {
       const date = new Date(originalData);
@@ -157,7 +251,6 @@ export default ({ app }, inject) => {
       ];
       return daysOfWeek[day];
     },
-
 
     dmy(date) {
       let dateObj = new Date(date);
@@ -463,7 +556,7 @@ export default ({ app }, inject) => {
   };
 
   // Inject the functions into the context as $localStorage
-  inject('localStorage', {
+  inject("localStorage", {
     set: setLocalStorageItem,
     get: getLocalStorageItem,
     remove: removeLocalStorageItem,

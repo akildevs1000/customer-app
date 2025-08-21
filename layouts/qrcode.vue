@@ -180,9 +180,15 @@
         style="border-right: 0px solid #ddd"
       >
         <!-- <span class="qrcode-color">Check-out</span> -->
-        <v-avatar size="40">
-          <v-icon color="primary">mdi-chat</v-icon></v-avatar
+
+        <v-badge
+          v-if="unreadMessageCount"
+          :color="unreadMessageCount > 0 ? 'error' : 'success'"
+          :content="unreadMessageCount"
         >
+          <v-icon color="primary">mdi-chat</v-icon>
+        </v-badge>
+        <v-icon v-else color="primary">mdi-chat</v-icon>
       </v-btn>
 
       <v-btn
@@ -220,6 +226,7 @@ export default {
     group: null,
     roomNumber: "",
     customerName: "",
+    unreadMessageCount: 0,
   }),
   auth: false,
   mounted() {
@@ -235,11 +242,48 @@ export default {
     group() {
       this.drawer = false;
     },
+
+    async $route(to, from) {
+      console.log("Route changed from", from.fullPath, "to", to.fullPath);
+
+      if (to.fullPath == " /chat") {
+        setTimeout(() => {
+          this.getChatUnreadmessages();
+        }, 1000 * 2);
+      }
+    },
   },
   created() {},
+  mounted() {
+    this.getChatUnreadmessages();
+
+    setInterval(() => {
+      this.getChatUnreadmessages();
+    }, 1000 * 15);
+  },
   methods: {
     goToPage(name) {
       this.$router.push(name);
+    },
+    async getChatUnreadmessages() {
+      let company_id = this.$auth.user?.company?.id || 0;
+      //console.log("company_id", company_id);
+      if (company_id == 0) {
+        return false;
+      }
+      let options = {
+        params: {
+          company_id: company_id,
+          booking_room_id:
+            localStorage.getItem("hotelQrcodeBookingRoomId") || null,
+        },
+      };
+
+      await this.$axios
+        .get(`chat_get_guest_unread_messages`, options)
+        .then(async ({ data }) => {
+          this.unreadMessageCount = data.length;
+        });
     },
   },
 };

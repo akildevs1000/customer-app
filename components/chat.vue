@@ -122,7 +122,12 @@
         @keydown="onKey"
         @input="sendTyping"
         placeholder=" Write a message…"
-        style="border: 1px solid black; width: 100%; border-radius: 5px"
+        style="
+          border: 1px solid black;
+          width: 100%;
+          border-radius: 5px;
+          padding-left: 5px;
+        "
       />
       <v-icon
         size="20"
@@ -248,8 +253,22 @@ export default {
       return [...this.typingSet].map(this.prettyUser);
     },
   },
+  // beforeRouteEnter(to, from, next) {
+  //   console.log("Entering route:", to.fullPath);
+  //   next();
+  // },
+  // beforeRouteUpdate(to, from, next) {
+  //   console.log("Route updated:", to.fullPath);
+  //   next();
+  // },
+  // watch: {
+  //   $route(to, from) {
+  //     console.log("Route changed from", from.fullPath, "to", to.fullPath);
+  //     this.loadData(); // Example method
+  //   },
+  // },
   async mounted() {
-    // Subscribe to messages in this room
+    this.updateGuestReadStatus(); // Subscribe to messages in this room
     this.msgUnsub = this.$mqtt.sub(this.msgTopic, (m) => {
       if (!m) return;
       this.upsertMessage(m);
@@ -314,6 +333,14 @@ export default {
     Object.values(this._typingTimers || {}).forEach((t) => clearTimeout(t));
   },
   methods: {
+    updateGuestReadStatus() {
+      this.$axios
+        .post("chat_update_guest_read_status", {
+          company_id: this.hotelId,
+          booking_room_id: this.bookingRoomId,
+        })
+        .then(async ({ data }) => {});
+    },
     handleFileSelect(event) {
       this.selectedFile = event.target.files[0] || null;
       console.log("Selected file:", this.selectedFile?.name);
@@ -423,6 +450,14 @@ export default {
       let m = {
         id: Date.now() + "_" + this.bookingRoomId,
         sender: this.me,
+        tsString: new Date().toLocaleString("en-US", {
+          timeZone: this.timezone,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
         role: "guest",
         type: "text",
         text,
@@ -506,6 +541,14 @@ export default {
           url: url,
           filename: "image",
           ts: this.getSecondsInTimezone(this.timezone),
+          tsString: new Date().toLocaleString("en-US", {
+            timeZone: this.timezone,
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
           tsDb: Date.now(),
           booking_id: this.bookingId,
           booking_room_id: this.bookingRoomId,
@@ -670,6 +713,14 @@ export default {
       const m = {
         id: Date.now() + "" + this.bookingRoomId, //Date.now() + "_" + Math.random().toString(36).slice(2),
         sender: this.me,
+        tsString: new Date().toLocaleString("en-US", {
+          timeZone: this.timezone,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
         role: "guest",
         type: "audio",
 
