@@ -13,24 +13,30 @@
         style="padding: 4px; font-size: 14px; background-color: #b3b3b3"
         dense
       >
-        <span>Orders List </span>
+        <span>Kitchen Orders List </span>
 
         <v-spacer></v-spacer>
         Total Price {{ cartGrandTotalAmount }}
       </v-card-title>
       <v-card-text class="pa-0 pt-2" style="font-size: 12px">
-        <v-expansion-panels inset>
+        <v-expansion-panels
+          inset
+          v-model="panelsList"
+          multiple
+          style="padding: 0px"
+        >
           <v-expansion-panel
+            style="padding: 0px"
             v-for="(items, datetime) in cartItems"
             :key="index"
           >
-            <v-expansion-panel-header
+            <v-expansion-panel-header style="padding: 0px"
               >{{ datetime }} -
               <v-spacer
                 >Total Items ({{ items.length }})</v-spacer
               ></v-expansion-panel-header
             >
-            <v-expansion-panel-content style="width: 100%">
+            <v-expansion-panel-content style="width: 100%; padding: 0px">
               <v-row :key="index2" v-for="(item, index2) in items" class="pt-2">
                 <v-col cols="1" style="padding-right: 0px">
                   {{ index2 + 1 }}
@@ -49,19 +55,30 @@
                       cursor: pointer;
                     "
                   />
-                  <div>{{ item.food?.name }}</div>
                 </v-col>
-                <v-col cols="4" class="pl-0 pr-0" flex>
+                <v-col
+                  ><div>{{ item.food?.name }}</div></v-col
+                >
+                <v-col class="pl-0 pr-0" flex>
                   <div style="font-size: 12px">
                     {{ item.qty }}
-                    <v-icon color="green">mdi-alpha-x-box</v-icon>
+                    <v-icon color="green" size="18">mdi-alpha-x-box</v-icon>
                     {{ item.food_price }}
-                    <v-icon color="green">mdi-chevron-right</v-icon>
-                    {{ (item.food_price * item.qty).toFixed(2) }}
                   </div>
                 </v-col>
-                <v-col cols="3" class="flex">
-                  <div v-if="item.status == 0">--</div>
+                <v-col>
+                  {{ (item.food_price * item.qty).toFixed(2) }}
+                </v-col>
+                <v-col class="flex">
+                  <div v-if="item.status == 0">
+                    <v-icon
+                      @click="cancelItem(item)"
+                      title="Click to Cancel the Item"
+                      v-if="item.status == 0"
+                      color="red"
+                      >mdi mdi-close-circle</v-icon
+                    >
+                  </div>
                   <div v-else-if="item.status == 1" style="color: #93ab6d">
                     Preparing
                   </div>
@@ -71,15 +88,6 @@
                   <div v-else-if="item.status == 3" style="color: red">
                     Cancelled
                   </div>
-                </v-col>
-                <v-col cols="1">
-                  <v-icon
-                    @click="cancelItem(item)"
-                    title="Click to Cancel the Item"
-                    v-if="item.status == 0"
-                    color="red"
-                    >mdi mdi-close-circle</v-icon
-                  >
                 </v-col>
               </v-row>
             </v-expansion-panel-content>
@@ -148,6 +156,7 @@ export default {
     booking_id: "",
     room_number: "",
     loading: false,
+    panelsList: [],
     pageValid: false,
   }),
   auth: false,
@@ -162,6 +171,8 @@ export default {
       this.getOrderedList();
     } else {
     }
+    this.panelsList.push(0);
+    // this.cartItems.forEach((index, element) => {});
   },
   watch: {},
   created() {

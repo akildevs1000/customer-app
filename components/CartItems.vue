@@ -108,7 +108,11 @@
             > -->
             <v-spacer></v-spacer>
             <v-btn
-              v-if="cartTotalAmount > 0"
+              v-if="
+                (!checkout_request_datetime ||
+                  checkout_request_datetime == 'null') &&
+                cartTotalAmount > 0
+              "
               @click="confirmToOrder()"
               small
               right
@@ -152,6 +156,7 @@ export default {
     room_number: "",
     pageValid: false,
     snackbar: false,
+    checkout_request_datetime: null,
     snackbarMessage: "",
   }),
   watch: {
@@ -164,18 +169,22 @@ export default {
   },
   mounted() {
     if (localStorage) {
+      this.cartItems = JSON.parse(localStorage.getItem("QRCodeCartItems"));
       // this.getCompanyDetails(localStorage.getItem("hotelQrcodeCompanyId"));
       this.company_id = localStorage.getItem("hotelQrcodeCompanyId");
       this.room_id = localStorage.getItem("hotelQrcodeRoomId");
       this.booking_id = localStorage.getItem("hotelQrcodeBookingRoomId");
       this.room_number = localStorage.getItem("hotelQrcodeRoomNumber");
       this.pageValid = localStorage.getItem("hotelQRCodeOTPverified");
+
+      this.checkout_request_datetime = localStorage.getItem(
+        "checkout_request_datetime"
+      );
     } else {
     }
   },
   created() {
     this.getTotal();
-    this.cartItems = JSON.parse(localStorage.getItem("QRCodeCartItems"));
   },
   methods: {
     confirmToOrder() {

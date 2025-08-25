@@ -57,7 +57,7 @@
                         <img
                           src="/home1.jpeg"
                           @click="
-                            sendOTP();
+                            sendOTP(1);
                             intro = false;
                           "
                           class="profile-image"
@@ -69,7 +69,7 @@
                       <img
                         src="/home2.jpeg"
                         @click="
-                          sendOTP();
+                          sendOTP(1);
                           intro = false;
                         "
                         class="profile-image"
@@ -82,7 +82,7 @@
                         color="red"
                         style="color: #fff"
                         @click="
-                          sendOTP();
+                          sendOTP(1);
                           intro = false;
                         "
                         >Click to Order
@@ -114,7 +114,7 @@
                             dense
                             ref="name"
                             outlined
-                            v-model="whatsapp_otp"
+                            v-model="whatsapp_otp_customer"
                             :error-messages="errorMessages"
                             label="Whatsapp OTP"
                             placeholder="Whatsapp OTP"
@@ -145,7 +145,7 @@
                               color="error"
                               desne
                               small
-                              @click="sendOTP()"
+                              @click="sendOTP(1)"
                             >
                               Resend
                             </v-btn>
@@ -195,7 +195,9 @@ export default {
     errorMessages: [],
     id: "",
     pageValid: false,
-    whatsapp_otp: "",
+    whatsapp_otp_customer: "",
+    // whatsapp_otp_generated: "",
+
     name: "",
     whatsapp_number: "",
     loading: false,
@@ -213,7 +215,7 @@ export default {
 
   mounted() {
     this.clearDefaults();
-    this.sendOTP();
+    this.sendOTP(0);
     setTimeout(() => {
       this.welcomeSection = false;
       this.expand = true;
@@ -238,9 +240,9 @@ export default {
     // }
   },
   methods: {
-    sendOTP() {
+    sendOTP(otpStatus) {
       if (this.queryParams) {
-        this.getGuestDetails(this.queryParams);
+        this.getGuestDetails(this.queryParams, otpStatus);
       }
     },
     clearDefaults() {
@@ -256,11 +258,11 @@ export default {
       localStorage.removeItem("hotelQrcodeBookingRoomId");
       localStorage.removeItem("hotelQrcodeWhatsappNumber");
     },
-    getGuestDetails(params) {
+    getGuestDetails(params, otpStatus = 0) {
       let options = {
         params: {
           ...params,
-          otp: 1,
+          otp: otpStatus,
         },
       };
       this.loading = true;
@@ -268,7 +270,7 @@ export default {
         this.otp_sent = true;
 
         if (data.status) {
-          this.whatsapp_otp = data.record.whatsapp_otp;
+          // this.whatsapp_otp_generated = data.record.whatsapp_otp;
           const { company_id, room_no, room_id } = params;
           const customer = data.record.customer;
 
@@ -287,13 +289,17 @@ export default {
 
           localStorage.setItem(
             "hotelQrcodeCustomerName",
-            customer.title + "." + this.$utils.capsTitle(customer.full_name)
+            customer.title +
+              "." +
+              this.$utils.capsTitle(
+                customer.first_name + " " + customer.last_name
+              )
           );
           localStorage.setItem("hotelQrcodeBookingRoomId", data.record.id);
           localStorage.setItem("hotelQrcodeWhatsappNumber", customer.whatsapp);
 
           // Update component state
-          this.customer_otp = this.whatsapp_otp;
+          this.customer_otp = this.whatsapp_otp_customer;
           this.loading = false;
 
           // Store data in localStorage
@@ -313,7 +319,9 @@ export default {
           this.whatsapp_number = customer.whatsapp;
           this.profilePic =
             customer.image || process.env.APP_URL + "/noimage.png";
-          this.customerName = `${customer.title}. ${customer.full_name}`;
+          this.customerName = `${customer.title}. ${
+            customer.first_name + " " + customer.last_name
+          }`;
 
           this.pageValid = true;
         } else if (data.status == false) {
@@ -338,6 +346,18 @@ export default {
       }, 5000);
     },
     maskNumber(number) {
+      if (number) {
+        let finalValue = "";
+        //first 3 letters and last 2 letters visible . Remaining replace with X
+        finalValue =
+          number.slice(0, 3) +
+          "XXXXXX" +
+          number.slice(number.length - 3, number.length);
+
+        console.log("finalValue", finalValue);
+
+        return finalValue;
+      }
       if (number)
         return "X".repeat(Math.max(0, number.length - 5)) + number.slice(-4);
     },
@@ -346,16 +366,35 @@ export default {
     },
 
     verifyOtp() {
-      console.log(this.whatsapp_otp, this.customer_otp);
-      if (this.whatsapp_otp == this.customer_otp) {
-        localStorage.setItem("hotelQRCodeOTPverified", true);
-        this.$store.commit("hotelQRCodeOTPverified", true);
+      this.$axios
+        .post("/chat_verify_whatsapp_otp", {
+          booking_room_id: localStorage.getItem("hotelQrcodeBookingRoomId"),
+          otp: this.whatsapp_otp_customer,
+        })
+        .then(({ data }) => {
+          if (data.status) {
+            // this.message = "File uploaded successfully";
+            localStorage.setItem("hotelQRCodeOTPverified", true);
+            // this.$store.commit("hotelQRCodeOTPverified", true);
 
-        localStorage.setItem("hotelQRCodeOTPverified", true);
-        this.$router.push("/food_categories");
-      } else {
-        this.error_message = "Invalid OTP";
-      }
+            localStorage.setItem("hotelQRCodeOTPverified", true);
+            this.$router.push("/food_categories");
+          } else {
+            // this.message = "File upload failed";
+            this.error_message = "Invalid OTP";
+          }
+        });
+
+      // // console.log(this.whatsapp_otp_customer, this.customer_otp);
+      // if (this.whatsapp_otp_customer == this.whatsapp_otp_generated) {
+      //   localStorage.setItem("hotelQRCodeOTPverified", true);
+      //   this.$store.commit("hotelQRCodeOTPverified", true);
+
+      //   localStorage.setItem("hotelQRCodeOTPverified", true);
+      //   this.$router.push("/food_categories");
+      // } else {
+      //   this.error_message = "Invalid OTP";
+      // }
     },
   },
 };

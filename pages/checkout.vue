@@ -5,7 +5,8 @@
         {{ snackbarMessage }}
       </v-snackbar>
     </div>
-    <v-card>
+
+    <v-card class="mt-2">
       <div style="text-align: center" v-if="loading">
         <img src="/loading.gif" width="200px" />
       </div>
@@ -13,7 +14,7 @@
         style="padding: 4px; font-size: 14px; background-color: #b3b3b3"
         dense
       >
-        <span>Orders List </span>
+        <span>Room Orders List(Postings) - Detailed Information </span>
 
         <v-spacer></v-spacer>
         <!-- Total Price {{ cartGrandTotalAmount }} -->
@@ -120,29 +121,11 @@
           </template>
         </AssetsTable>
         <v-row
-          ><v-col class="text-right bold pa-5" style="font-size: 20px">
-            Total : {{ cartGrandTotalAmount }}
+          ><v-col class="text-right bold pa-5 primary--text">
+            Total : &nbsp;&nbsp;{{
+              $utils.currency_format(cartGrandTotalAmount)
+            }}
           </v-col></v-row
-        >
-        <v-row
-          ><v-col class="text-center">
-            <v-btn
-              v-if="
-                !checkout_request_datetime ||
-                checkout_request_datetime == 'null'
-              "
-              @click="checkOut()"
-              style="width: 100%; margin-top: 100px"
-              dark
-              filled
-              color="red"
-              >Check Out</v-btn
-            >
-
-            <v-chip v-else color="red" style="color: #fff; text-align: center">
-              Checkout is Requested at {{ checkout_request_datetime }}
-            </v-chip></v-col
-          ></v-row
         >
 
         <!-- <v-row>
@@ -183,12 +166,40 @@
         ></v-card-actions> -->
       </v-card-text>
     </v-card>
+    <Checkout
+      class="mt-6"
+      v-if="checkData && roomData"
+      :BookingData="checkData"
+      :roomData="roomData"
+    />
+    <v-row style="margin-top: 80px"
+      ><v-col class="text-center">
+        <v-btn
+          v-if="
+            !checkout_request_datetime || checkout_request_datetime == 'null'
+          "
+          @click="checkOut()"
+          style="width: 100%"
+          dark
+          filled
+          color="red"
+          >Check Out</v-btn
+        >
+
+        <v-chip v-else color="green" style="color: #fff; text-align: center">
+          Checkout is Requested at {{ checkout_request_datetime }}
+        </v-chip></v-col
+      ></v-row
+    >
   </div>
   <div v-else style="padding: 25%">UnAuthorised Access</div>
 </template>
 
 <script>
+import Checkout from "../components/Checkout.vue";
+
 export default {
+  components: { Checkout },
   layout: "qrcode",
   data: () => ({
     cartTotalAmount: 0,
@@ -210,6 +221,8 @@ export default {
     pageValid: false,
     panels: [],
     checkout_request_datetime: null,
+    checkData: null,
+    roomData: null,
   }),
   auth: false,
   mounted() {
@@ -226,6 +239,7 @@ export default {
       );
 
       this.getOrderedList();
+      this.getCheckOutdata();
     } else {
     }
   },
@@ -243,6 +257,28 @@ export default {
     }, 1000 * 60);
   },
   methods: {
+    getCheckOutdata() {
+      let payload = {
+        params: {
+          id: this.booking_room_id,
+          company_id: this.company_id,
+        },
+      };
+      this.$axios.get(`get_booked_room`, payload).then(({ data }) => {
+        this.checkData = data.booking;
+        this.roomData = data;
+        // this.bookingId = data.booking.id;
+
+        // this.rightClickRoomId = data.booking.resourceId;
+
+        // this.full_payment = "";
+        // this.bookingStatus = data.booking_status;
+        // this.customerId = data.booking.customer_id;
+        // if (this.isDbCLick) {
+        //   this.get_event_by_db_click();
+        // }
+      });
+    },
     isPageValid() {
       return this.pageValid;
     },

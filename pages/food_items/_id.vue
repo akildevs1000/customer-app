@@ -197,7 +197,7 @@
               style="
                 border: 1px solid #ddd;
                 max-width: 100%;
-                height: 160px;
+                height: 140px;
                 border-radius: 10px;
                 object-fit: cover;
                 cursor: pointer;
@@ -219,6 +219,7 @@
                 @click="addToCart(item, +1)"
                 color="error"
                 v-if="
+                  getItemStatus(item) == '1' &&
                   cartItems.find((e) => e.id == item.id) &&
                   cartItems.find((e) => e.id == item.id).qty == 0
                 "
@@ -230,7 +231,10 @@
                 dense
                 color="error"
                 @click="addToCart(item, +1)"
-                v-else-if="!cartItems.find((e) => e.id == item.id)"
+                v-else-if="
+                  getItemStatus(item) == '1' &&
+                  !cartItems.find((e) => e.id == item.id)
+                "
                 >Add
               </v-btn>
               <div v-else>

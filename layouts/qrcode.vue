@@ -4,7 +4,7 @@
       body,
       header {
         font-size: 11px !important;
-        max-width: 500px !important;
+        max-width: 400px !important;
         /* width: 500px !important; */
         margin: auto !important;
       }
@@ -129,7 +129,7 @@
 
     <v-container
       fluid
-      style="max-width: 500px; margin: 0 auto; border: 1px solid #ccc"
+      style="max-width: 400px; margin: 0 auto; border: 1px solid #ccc"
     >
       <div class="header-bottom-image"></div>
 
@@ -159,19 +159,35 @@
           <v-icon color="primary">mdi mdi-home-outline</v-icon>
         </v-avatar>
       </v-btn>
+      <!-- <v-btn
+        @click="goToPage('/food_menu')"
+        style="border-right: 0px solid #ddd"
+      >
+
+        <v-avatar size="40">
+          <v-icon color="primary">mdi mdi-food</v-icon></v-avatar
+        >
+
+
+        cartItems
+      </v-btn> -->
+
       <v-btn
         @click="goToPage('/food_menu')"
         style="border-right: 0px solid #ddd"
       >
-        <!-- <span class="qrcode-color">Food</span> -->
-        <v-avatar size="40">
-          <v-icon color="primary">mdi mdi-food</v-icon></v-avatar
+        <v-badge
+          v-if="cartItems.length"
+          :color="cartItems.length > 0 ? 'error' : 'success'"
+          :content="cartItems.length"
         >
+          <v-icon color="primary">mdi mdi-food</v-icon>
+        </v-badge>
+        <v-icon v-else color="primary">mdi mdi-food</v-icon>
       </v-btn>
       <v-btn @click="goToPage('/orders')" style="border-right: 0px solid #ddd">
-        <!-- <span class="qrcode-color">My Orders</span> -->
         <v-avatar size="40"
-          ><v-icon color="primary">mdi-format-list-bulleted</v-icon></v-avatar
+          ><v-icon color="primary">mdi-chef-hat</v-icon></v-avatar
         >
       </v-btn>
 
@@ -197,19 +213,27 @@
       >
         <!-- <span class="qrcode-color">Check-out</span> -->
         <v-avatar size="40">
-          <v-icon color="primary">mdi-airplane-takeoff</v-icon></v-avatar
+          <v-icon
+            :color="
+              checkout_request_datetime == null ||
+              checkout_request_datetime == 'null'
+                ? 'primary'
+                : 'error'
+            "
+            >mdi-airplane-takeoff</v-icon
+          ></v-avatar
         >
       </v-btn>
 
-      <v-btn
+      <!-- <v-btn
         @click="$router.push(`/profile?company_id=3&room_id=92&room_no=101`)"
         style="border-right: 0px solid #ddd"
       >
-        <!-- <span class="qrcode-color">Check-out</span> -->
+
         <v-avatar size="40">
           <v-icon color="primary">mdi-account</v-icon></v-avatar
         >
-      </v-btn>
+      </v-btn> -->
       <!-- <v-btn @click="goToPage('home')" style="border-right: 0px solid #ddd">
             <span class="qrcode-color">Phones</span>
             <v-icon class="qrcode-color">mdi mdi-card-account-phone</v-icon>
@@ -226,7 +250,9 @@ export default {
     group: null,
     roomNumber: "",
     customerName: "",
+    checkout_request_datetime: null,
     unreadMessageCount: 0,
+    cartItems: [],
   }),
   auth: false,
   mounted() {
@@ -234,9 +260,42 @@ export default {
       this.currentTime = new Date().toLocaleTimeString([], { hour12: false });
     }, 1000);
 
+    setInterval(() => {
+      this.cartItems = JSON.parse(
+        localStorage.getItem("QRCodeCartItems") || "[]"
+      );
+    }, 1000 * 5);
+    this.cartItems = JSON.parse(
+      localStorage.getItem("QRCodeCartItems") || "[]"
+    );
+    // Watch for storage changes in case another tab/window updates it
+    // Load cart items once on mount
+    const storedItems = localStorage.getItem("QRCodeCartItems") || "[]";
+    this.cartItems = storedItems ? JSON.parse(storedItems) : [];
+
+    // Watch for storage changes in case another tab/window updates it
+    window.addEventListener("storage", (event) => {
+      console.log(event.key);
+
+      if (event.key === "QRCodeCartItems") {
+        this.cartItems = event.newValue ? JSON.parse(event.newValue) : [];
+      }
+    });
+
     this.roomNumber = localStorage.getItem("hotelQrcodeRoomNumber") || "---";
+
     this.customerName =
       localStorage.getItem("hotelQrcodeCustomerName") || "---";
+
+    this.getChatUnreadmessages();
+
+    setInterval(() => {
+      this.getChatUnreadmessages();
+    }, 1000 * 15);
+
+    this.checkout_request_datetime = localStorage.getItem(
+      "checkout_request_datetime"
+    );
   },
   watch: {
     group() {
@@ -249,18 +308,12 @@ export default {
       if (to.fullPath == " /chat") {
         setTimeout(() => {
           this.getChatUnreadmessages();
-        }, 1000 * 2);
+        }, 1000);
       }
     },
   },
   created() {},
-  mounted() {
-    this.getChatUnreadmessages();
 
-    setInterval(() => {
-      this.getChatUnreadmessages();
-    }, 1000 * 15);
-  },
   methods: {
     goToPage(name) {
       this.$router.push(name);
