@@ -5,10 +5,7 @@
       <v-row>
         <v-col cols="12" class="text-center">
           <v-avatar size="200">
-            <img
-              :src="process.env.APP_URL + '/noimage.png'"
-              alt="Customer Photo"
-            />
+            <img :src="appUrl + '/noimage.png'" alt="Customer Photo" />
           </v-avatar>
         </v-col>
         <v-col cols="12" class="text-center">
@@ -112,6 +109,13 @@ export default {
     return {
       checkoutDialog: false, // Controls the confirmation dialog visibility
     };
+  },
+
+  computed: {
+    // Computed properties can be added here
+    appUrl() {
+      return process.env.APP_URL;
+    },
   },
   methods: {
     checkout() {

@@ -7,7 +7,7 @@ export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     titleTemplate: "",
-    title: "MyHotel",
+    title: "MyHotel2Cloud Guest App",
     meta: [
       {
         charset: "utf-8",
@@ -58,6 +58,12 @@ export default {
         async: false,
         body: false,
       }, // Insert in body
+      {
+        type: "text/javascript",
+        src: "https://unpkg.com/mqtt/dist/mqtt.min.js",
+        async: false,
+        body: false,
+      },
     ],
   },
 
@@ -66,6 +72,7 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
+    { src: "~/plugins/mqtt.client.js", mode: "client" },
     {
       src: "~/plugins/axios.js",
     },
@@ -81,7 +88,6 @@ export default {
 
     "~/plugins/qrcode.js",
     "~/plugins/custom-methods.js",
-
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -144,9 +150,9 @@ export default {
     },
   },
 
-  router: {
-    middleware: ["auth"],
-  },
+  // router: {
+  //   middleware: ["auth"],
+  // },
 
   // serverMiddleware: ['~middleware/verify.js'],
 
@@ -189,6 +195,7 @@ export default {
       "tiptap-vuetify",
       "vue-apexchart",
       "@fullcalendar.*",
+      "mqtt",
     ],
   },
 
