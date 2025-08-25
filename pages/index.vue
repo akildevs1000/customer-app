@@ -327,8 +327,10 @@ export default {
         } else if (data.status == false) {
           this.loading = false;
           this.message =
-            "Check-in Details are not Found.Please scan QR code again Sorry for the inconvenience";
-          alert(this.message);
+            "<span style='color:red'>Check-in Details are not Found.<br/>Please scan QR code again Sorry for the inconvenience</span>";
+          alert(
+            "Check-in Details are not Found. Please scan QR code again Sorry for the inconvenience"
+          );
         }
 
         setTimeout(() => {
