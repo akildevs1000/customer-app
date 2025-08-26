@@ -18,7 +18,7 @@
         <v-col cols="12" sm="12" md="12" lg="12" class="text-center">
           <div v-if="loadingStep1">
             Validating your Booking information. Please wait...
-            <img src="/loading.gif" width="200px" />
+            <!-- <img src="/loading.gif" width="200px" /> -->
           </div>
           <v-card
             elevation="0"
