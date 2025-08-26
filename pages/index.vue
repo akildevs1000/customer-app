@@ -13,172 +13,165 @@
           <img src="/loading.gif" style="padding-top: 50%; max-width: 100%" />
         </v-col>
       </v-row>
-      <v-expand-x-transition mode="in" hide-on-leave="true">
-        <v-card v-show="expand" elevation="0">
-          <v-card-text>
-            <v-col cols="12" sm="12" md="12" lg="12" class="text-center">
-              <div v-if="loadingStep1">
-                Validating your Booking information. Please wait...
-                <img src="/loading.gif" width="200px" />
-              </div>
-              <v-card
-                elevation="0"
-                ref="form"
-                v-if="whatsapp_number != ''"
-                transition="slide-x-transition"
-              >
-                <v-card-text>
-                  <div>
-                    <div
-                      style="font-size: 20px; padding: 10px; font-weight: bold"
-                    >
-                      Welcome To
-                    </div>
-                    <img style="width: 200px" src="/login/login-logo.png" />
 
-                    <v-row>
-                      <v-col cols="12" class="pt-8"
-                        ><v-chip
-                          filter
-                          label
-                          color="primary"
-                          style="padding: 20px; font-size: 30px"
-                          ><v-icon left size="25">mdi-tag</v-icon> Room Number :
-                          {{ room_number }}</v-chip
-                        ></v-col
-                      >
-                      <v-col
-                        cols="12"
-                        style="font-size: 20px; font-weight: bold"
-                      >
-                        {{ customerName }}
-                      </v-col>
-                      <v-col cols="12" v-if="intro">
-                        <img
-                          src="/home1.jpeg"
-                          @click="
-                            sendOTP(1);
-                            intro = false;
-                          "
-                          class="profile-image"
-                        />
-                      </v-col>
-                    </v-row>
+      <v-row>
+        <v-col cols="12" sm="12" md="12" lg="12" class="text-center">
+          <div v-if="loadingStep1">
+            Validating your Booking information. Please wait...
+            <img src="/loading.gif" width="200px" />
+          </div>
+          <v-card
+            elevation="0"
+            ref="form"
+            v-if="whatsapp_number != ''"
+            transition="slide-x-transition"
+          >
+            <v-card-text>
+              <div>
+                <div style="font-size: 20px; padding: 10px; font-weight: bold">
+                  Welcome To
+                </div>
+                <img style="width: 200px" src="/login/login-logo.png" />
 
-                    <v-col cols="12" v-if="intro">
+                <v-row>
+                  <v-col cols="12" class="pt-8"
+                    ><v-chip
+                      filter
+                      label
+                      color="primary"
+                      style="padding: 20px; font-size: 30px"
+                      ><v-icon left size="25">mdi-tag</v-icon> Room Number :
+                      {{ room_number }}</v-chip
+                    ></v-col
+                  >
+                  <v-col cols="12" style="font-size: 20px; font-weight: bold">
+                    {{ customerName }}
+                  </v-col>
+                  <v-col cols="12" v-if="intro">
+                    <img
+                      src="/home1.jpeg"
+                      @click="
+                        sendOTP(1);
+                        intro = false;
+                      "
+                      class="profile-image"
+                    />
+                  </v-col>
+                </v-row>
+
+                <v-col cols="12" v-if="intro">
+                  <img
+                    src="/home2.jpeg"
+                    @click="
+                      sendOTP(1);
+                      intro = false;
+                    "
+                    class="profile-image"
+                  />
+                </v-col>
+                <v-col cols="12" v-if="intro">
+                  <v-btn
+                    dense
+                    fill
+                    color="red"
+                    style="color: #fff"
+                    @click="
+                      sendOTP(1);
+                      intro = false;
+                    "
+                    >Click to Order
+                    <v-icon class="pl-4" light>mdi-food</v-icon></v-btn
+                  >
+                </v-col>
+                <v-col cols="12" v-if="!intro">
+                  <v-row>
+                    <v-col>
                       <img
-                        src="/home2.jpeg"
-                        @click="
-                          sendOTP(1);
-                          intro = false;
+                        :src="profilePic"
+                        style="
+                          max-height: 250px;
+                          max-width: 100%;
+                          border-radius: 50%;
+                          height: 200px;
+                          width: 200px;
                         "
-                        class="profile-image"
                       />
-                    </v-col>
-                    <v-col cols="12" v-if="intro">
-                      <v-btn
+
+                      <p class="text-center pt-8">
+                        Enter whatsapp OTP is sent to your Mobile Number:
+                        <br />
+                        {{ maskNumber(whatsapp_number) }}
+                      </p>
+
+                      <v-text-field
+                        clearable
                         dense
-                        fill
-                        color="red"
-                        style="color: #fff"
-                        @click="
-                          sendOTP(1);
-                          intro = false;
-                        "
-                        >Click to Order
-                        <v-icon class="pl-4" light>mdi-food</v-icon></v-btn
-                      >
+                        ref="name"
+                        outlined
+                        v-model="whatsapp_otp_customer"
+                        :error-messages="errorMessages"
+                        label="Whatsapp OTP"
+                        placeholder="Whatsapp OTP"
+                        required
+                        type="number"
+                        append-icon="mdi mdi-whatsapp"
+                      ></v-text-field>
+                      <label style="color: red">{{ error_message }}</label>
+
+                      <!-- <v-divider class="mt-12"></v-divider> -->
+
+                      <div>
+                        <v-btn
+                          style="width: 250px"
+                          class="otp-button primary"
+                          desne
+                          small
+                          primary
+                          @click="verifyOtp()"
+                        >
+                          Verify OTP
+                        </v-btn>
+                      </div>
+
+                      <div class="pt-3">
+                        <v-btn
+                          text
+                          color="error"
+                          desne
+                          small
+                          @click="sendOTP(1)"
+                        >
+                          Resend
+                        </v-btn>
+                      </div>
+                      <div class="pt-3">
+                        <v-btn
+                          style="width: 250px"
+                          text
+                          class="error"
+                          desne
+                          small
+                          @click="intro = true"
+                        >
+                          Back To Home
+                          <v-icon>mdi-home-circle-outline</v-icon>
+                        </v-btn>
+                      </div>
                     </v-col>
-                    <v-col cols="12" v-if="!intro">
-                      <v-row>
-                        <v-col>
-                          <img
-                            :src="profilePic"
-                            style="
-                              max-height: 250px;
-                              max-width: 100%;
-                              border-radius: 50%;
-                              height: 200px;
-                              width: 200px;
-                            "
-                          />
-
-                          <p class="text-center pt-8">
-                            Enter whatsapp OTP is sent to your Mobile Number:
-                            <br />
-                            {{ maskNumber(whatsapp_number) }}
-                          </p>
-
-                          <v-text-field
-                            clearable
-                            dense
-                            ref="name"
-                            outlined
-                            v-model="whatsapp_otp_customer"
-                            :error-messages="errorMessages"
-                            label="Whatsapp OTP"
-                            placeholder="Whatsapp OTP"
-                            required
-                            type="number"
-                            append-icon="mdi mdi-whatsapp"
-                          ></v-text-field>
-                          <label style="color: red">{{ error_message }}</label>
-
-                          <!-- <v-divider class="mt-12"></v-divider> -->
-
-                          <div>
-                            <v-btn
-                              style="width: 250px"
-                              class="otp-button primary"
-                              desne
-                              small
-                              primary
-                              @click="verifyOtp()"
-                            >
-                              Verify OTP
-                            </v-btn>
-                          </div>
-
-                          <div class="pt-3">
-                            <v-btn
-                              text
-                              color="error"
-                              desne
-                              small
-                              @click="sendOTP(1)"
-                            >
-                              Resend
-                            </v-btn>
-                          </div>
-                          <div class="pt-3">
-                            <v-btn
-                              style="width: 250px"
-                              text
-                              class="error"
-                              desne
-                              small
-                              @click="intro = true"
-                            >
-                              Back To Home
-                              <v-icon>mdi-home-circle-outline</v-icon>
-                            </v-btn>
-                          </div>
-                        </v-col>
-                      </v-row>
-                    </v-col>
-                  </div>
-                </v-card-text>
-              </v-card>
-              <div style="padding-top: 60%; color: green" v-else-if="!loading">
-                <img
-                  src="@/static/logo.png"
-                  style="padding-top: 0%; max-width: 100%"
-                />
-                <p class="pt-10" v-html="message"></p>
+                  </v-row>
+                </v-col>
               </div>
-            </v-col> </v-card-text
-        ></v-card>
-      </v-expand-x-transition>
+            </v-card-text>
+          </v-card>
+          <div style="padding-top: 60%; color: green" v-else-if="!loading">
+            <img
+              src="@/static/logo.png"
+              style="padding-top: 0%; max-width: 100%"
+            />
+            <p class="pt-10" v-html="message"></p>
+          </div>
+        </v-col>
+      </v-row>
     </div>
   </v-app>
 </template>
