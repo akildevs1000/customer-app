@@ -236,6 +236,8 @@ export default {
     sendOTP(otpStatus) {
       if (this.queryParams) {
         this.getGuestDetails(this.queryParams, otpStatus);
+
+        // if (otpStatus) alert("OTP sent successfully");
       }
     },
     clearDefaults() {
@@ -313,7 +315,9 @@ export default {
           this.profilePic =
             customer.image || process.env.APP_URL + "/noimage.png";
           this.customerName = `${customer.title}. ${
-            customer.first_name + " " + customer.last_name
+            this.$utils.capsTitle(customer.first_name) +
+            " " +
+            this.$utils.capsTitle(customer.last_name)
           }`;
 
           this.pageValid = true;

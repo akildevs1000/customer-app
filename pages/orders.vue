@@ -42,15 +42,15 @@
                 <v-col cols="1" style="padding-right: 0px">
                   {{ index2 + 1 }}
                 </v-col>
-                <v-col class="text-center">
+                <v-col class="text-center pl-0 pr-0">
                   <img
-                    class="p-5 boxshadow"
+                    class="boxshadow"
                     :src="item.food.item_picture"
-                    width="50px"
+                    width="30px"
                     style="
                       border: 1px solid #ddd;
                       max-width: 100%;
-                      height: 40px;
+                      height: 30px;
                       border-radius: 10px;
                       object-fit: cover;
                       cursor: pointer;
@@ -60,7 +60,7 @@
                 <v-col
                   ><div>{{ item.food?.name }}</div></v-col
                 >
-                <v-col class="pl-0 pr-0" flex>
+                <v-col class="pl-0 pr-0">
                   <div style="font-size: 12px">
                     {{ item.qty }}
                     <v-icon color="green" size="18">mdi-alpha-x-box</v-icon>
@@ -70,7 +70,7 @@
                 <v-col>
                   {{ (item.food_price * item.qty).toFixed(2) }}
                 </v-col>
-                <v-col class="flex">
+                <v-col>
                   <div v-if="item.status == 0">
                     <v-icon
                       @click="cancelItem(item)"

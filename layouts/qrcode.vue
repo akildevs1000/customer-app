@@ -54,7 +54,7 @@
             {{ $auth?.user?.company?.name }}
           </span>
         </v-col>
-        <v-col style="font-size: 14px; text-align: center">
+        <v-col style="font-size: 12px; text-align: center">
           Hi,
           {{
             customerName.length > 15
@@ -129,7 +129,13 @@
 
     <v-container
       fluid
-      style="max-width: 400px; margin: 0 auto; border: 1px solid #ccc"
+      style="
+        max-width: 400px;
+        padding-left: 0px;
+        padding-right: 0px;
+        margin: 0 auto;
+        border: 1px solid #ccc;
+      "
     >
       <div class="header-bottom-image"></div>
 
@@ -349,6 +355,10 @@ export default {
   max-width: 100%;
   border-radius: 50%;
   object-fit: cover;
+}
+
+.v-expansion-panel-content__wrap {
+  padding: 5px !important;
 }
 </style>
 <style src="@/assets/css/chatStyles.css"></style>
