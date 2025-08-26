@@ -9,8 +9,12 @@
       max-width="100%"
       style="max-width: 100% !important; margin: 0px !important"
     >
-      <v-card>
-        <v-card-title dense class="primary white--text background">
+      <v-card style="font-size: 10px">
+        <v-card-title
+          dense
+          class="primary white--text background"
+          style="font-size: 12px"
+        >
           <span> Food Items - Total {{ this.cartItems.length }} </span>
 
           <v-spacer></v-spacer>
@@ -18,7 +22,7 @@
             mdi mdi-close-circle
           </v-icon>
         </v-card-title>
-        <v-card-text style="" class="pt-2">
+        <v-card-text class="pt-2" style="font-size: 11px">
           <v-row
             :key="index"
             v-for="(item, index) in cartItems"
@@ -39,14 +43,14 @@
             <v-col cols="5" class="text-right">
               {{ item.amount }}
               <span
-                ><v-icon color="red" @click="addToCart(item, -1)"
+                ><v-icon color="red" size="16" @click="addToCart(item, -1)"
                   >mdi mdi-minus-box</v-icon
                 ></span
               ><span style="font-weight: bold">
                 {{ cartItems.find((e) => e.id == item.id)?.qty || 0 }}</span
               >
               <span
-                ><v-icon color="green" @click="addToCart(item, +1)"
+                ><v-icon color="green" size="16" @click="addToCart(item, +1)"
                   >mdi mdi-plus-box</v-icon
                 ></span
               >
@@ -86,7 +90,7 @@
           </v-row>
           <!-- <v-divider></v-divider> -->
           <v-row>
-            <v-col style="color: red; font-size: 12px">*Excluding GST</v-col>
+            <v-col style="color: red; font-size: 10px">*Excluding GST</v-col>
             <!-- <v-col cols="4" style="font-weight: bold; text-align: center"
               >Total :</v-col
             > -->
@@ -158,6 +162,7 @@ export default {
     snackbar: false,
     checkout_request_datetime: null,
     snackbarMessage: "",
+    booking_rooms_id: null,
   }),
   watch: {
     cartItems: {
@@ -173,8 +178,10 @@ export default {
       // this.getCompanyDetails(localStorage.getItem("hotelQrcodeCompanyId"));
       this.company_id = localStorage.getItem("hotelQrcodeCompanyId");
       this.room_id = localStorage.getItem("hotelQrcodeRoomId");
-      this.booking_id = localStorage.getItem("hotelQrcodeBookingRoomId");
+      this.booking_id = localStorage.getItem("hotelQrcodeBookingId");
       this.room_number = localStorage.getItem("hotelQrcodeRoomNumber");
+      this.booking_rooms_id = localStorage.getItem("hotelQrcodeBookingRoomId");
+
       this.pageValid = localStorage.getItem("hotelQRCodeOTPverified");
 
       this.checkout_request_datetime = localStorage.getItem(
@@ -195,6 +202,7 @@ export default {
           room_id: this.room_id,
           booking_id: this.booking_id,
           room_number: this.room_number,
+          booking_rooms_id: this.booking_rooms_id,
         },
       };
       this.loading = true;

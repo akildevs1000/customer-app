@@ -26,7 +26,7 @@
         <!-- <div style="width: 100%; text-align: center">
           <v-img src="/logo.png" style="width: 200px" alt="Hotel Image"></v-img>
         </div> -->
-        <v-card-title class="headline"> HYDERSPARK LUXURY HOTEL </v-card-title>
+        <v-card-title class="headline"> HYDERSPARK Hotel </v-card-title>
 
         <v-card-text>
           <!-- Contact Information -->

@@ -27,10 +27,11 @@
         >
           <v-expansion-panel
             style="padding: 0px"
-            v-for="(items, datetime) in cartItems"
+            v-for="(items, datetime, index) in cartItems"
             :key="index"
           >
-            <v-expansion-panel-header style="padding: 0px"
+            <v-expansion-panel-header
+              style="padding: 0px; background-color: #ccccfd"
               >{{ datetime }} -
               <v-spacer
                 >Total Items ({{ items.length }})</v-spacer
@@ -168,10 +169,16 @@ export default {
       this.room_number = localStorage.getItem("hotelQrcodeRoomNumber");
       this.pageValid = localStorage.getItem("hotelQRCodeOTPverified");
 
+      this.company_id = localStorage.getItem("hotelQrcodeCompanyId");
+      this.room_id = localStorage.getItem("hotelQrcodeRoomId");
+      this.booking_id = localStorage.getItem("hotelQrcodeBookingId");
+      this.room_number = localStorage.getItem("hotelQrcodeRoomNumber");
+      this.booking_rooms_id = localStorage.getItem("hotelQrcodeBookingRoomId");
+
       this.getOrderedList();
     } else {
     }
-    this.panelsList.push(0);
+    //this.panelsList.push(0);
     // this.cartItems.forEach((index, element) => {});
   },
   watch: {},
@@ -204,6 +211,13 @@ export default {
         .get(`hotel_orders_get_food_items`, options)
         .then(({ data }) => {
           this.cartItems = data;
+
+          let i = 0;
+          for (let test in this.cartItems) {
+            this.panelsList.push(i);
+            i++;
+          }
+
           this.calculateTotal();
 
           this.loading = false;
@@ -289,9 +303,11 @@ export default {
     displyCartItems() {
       if (localStorage) {
         this.cartItems = JSON.parse(localStorage.getItem("QRCodeCartItems"));
-      } else {
-        this.cartItems = this.$store.state.hotelQRCodeCartItems;
       }
+
+      // else {
+      //   this.cartItems = this.$store.state.hotelQRCodeCartItems;
+      // }
     },
     async getCompanyDetails(company_id) {
       let options = {

@@ -34,8 +34,8 @@
             </div>
           </v-col>
 
-          <v-col v-if="!isGroupBooking" style="max-width: 80px">
-            <v-row>
+          <!-- <v-col v-if="!isGroupBooking" style="max-width: 80px">
+           <v-row>
               <v-col cols="12" class="text-right">
                 <v-icon
                   small
@@ -52,25 +52,25 @@
                 >
               </v-col>
             </v-row>
-          </v-col>
+          </v-col> -->
         </v-row>
       </v-card-title>
-      <v-card-text dense v-if="allDataLoaded">
+      <v-card-text dense v-if="allDataLoaded" style="padding: 0px">
         <!-- <Heading class="mb-3" label="Transactions" /> -->
 
         <table v-if="!isGroupBooking" style="width: 100%; line-height: 30px">
-          <tr style="font-size: 13px">
+          <tr style="font-size: 10px">
             <td class="text-center primary--text border-bottom">#</td>
             <td class="text-center primary--text border-bottom">Date</td>
-            <td class="text-right primary--text border-bottom">Debit</td>
+            <td class="text-right primary--text border-bottom">Dr</td>
 
-            <td class="text-right primary--text border-bottom">Credit</td>
+            <td class="text-right primary--text border-bottom">Cr</td>
             <td class="text-right primary--text border-bottom">info</td>
             <td class="text-right primary--text border-bottom">Balance</td>
           </tr>
 
           <tr
-            style="font-size: 13px"
+            style="font-size: 10px"
             v-for="(item, index) in transactions"
             :key="index"
           >
@@ -103,7 +103,7 @@
             </td>
           </tr>
 
-          <tr style="font-size: 13px">
+          <tr style="font-size: 10px">
             <td colspan="5" class="text-right primary--text">Total Balance</td>
             <td class="text-right pl-3 primary--text">
               {{ $utils.currency_format(totalTransactionAmount) }}
@@ -123,10 +123,15 @@ function formatTime(date) {
   return `${hours}:${minutes}`;
 }
 export default {
-  props: ["BookingData", "roomData"],
+  props: ["BookingData", "roomData", "company_id"],
 
   data() {
     return {
+      checkOutDialog: false,
+      allDataLoaded: false,
+      isPaymentBeforeSubmitted: false,
+      dialogItemInfo: false,
+      dialogItemInfoData: null,
       old_balance: 0,
       postingPaymentPayload: {
         paid: 0,
@@ -177,7 +182,7 @@ export default {
         no_of_baby: 0,
         address: "",
         image: "",
-        company_id: this.$auth.user.company.id,
+        company_id: null,
         dob_menu: false,
         dob: null,
         exp_menu: false,
@@ -185,15 +190,11 @@ export default {
       },
       after_discount_balance: 0,
       errors: [],
-
-      checkOutDialog: false,
-      allDataLoaded: false,
-      isPaymentBeforeSubmitted: false,
-      dialogItemInfo: false,
-      dialogItemInfoData: null,
     };
   },
-  created() {
+  created() {},
+
+  mounted() {
     this.preloader = false;
     if (this.roomData && this.roomData.id) {
       this.calculateHoursQty(this.roomData.check_out_time);
@@ -323,7 +324,7 @@ export default {
         remaining_price: this.remaining_price,
         full_payment: parseFloat(this.full_payment),
         payment_mode_id: this.payment_mode_id,
-        company_id: this.$auth.user.company.id,
+        company_id: this.company_id,
         isPrintInvoice: this.isPrintInvoice,
         reference_number: this.reference,
         discount: this.discount,
@@ -416,7 +417,7 @@ export default {
       let id = this.BookingData.id;
       let payload = {
         params: {
-          company_id: this.$auth.user.company.id,
+          company_id: this.company_id,
           // isHall: this.isHall,
           // exceedHoursCharges: this.exceedHoursCharges,
           // customer_id: this.BookingData.customer_id,

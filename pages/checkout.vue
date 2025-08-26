@@ -5,7 +5,25 @@
         {{ snackbarMessage }}
       </v-snackbar>
     </div>
+    <v-row style="margin-top: 10px"
+      ><v-col class="text-center">
+        <v-btn
+          v-if="
+            !checkout_request_datetime || checkout_request_datetime == 'null'
+          "
+          @click="checkOut()"
+          style="width: 100%"
+          dark
+          filled
+          color="red"
+          >Check Out</v-btn
+        >
 
+        <v-chip v-else color="green" style="color: #fff; text-align: center">
+          Checkout is Requested at {{ checkout_request_datetime }}
+        </v-chip></v-col
+      ></v-row
+    >
     <v-card class="mt-2">
       <div style="text-align: center" v-if="loading">
         <img src="/loading.gif" width="200px" />
@@ -14,14 +32,14 @@
         style="padding: 4px; font-size: 14px; background-color: #b3b3b3"
         dense
       >
-        <span>Room Orders List(Postings) - Detailed Information </span>
+        <span>Room Orders List(Postings) - Information </span>
 
         <v-spacer></v-spacer>
         <!-- Total Price {{ cartGrandTotalAmount }} -->
       </v-card-title>
-      <v-card-text class="pa-0 pt-2" style="font-size: 12px">
+      <v-card-text class="pa-0 pt-2" style="font-size: 11px">
         <AssetsTable
-          height="300"
+          style="max-height: 1000px; overflow: visible"
           :headers="[
             {
               text: `#`,
@@ -59,11 +77,11 @@
             //   value: `price`,
             //   align: `center`,
             // },
-            {
-              text: `Amount`,
-              value: `amount`,
-              align: `right`,
-            },
+            // {
+            //   text: `Amount`,
+            //   value: `amount`,
+            //   align: `right`,
+            // },
             {
               text: `GST`,
               value: `gst`,
@@ -105,6 +123,7 @@
           <template #qty="{ item }">
             {{ item.qty }} X
             {{ $utils.currency_format(item.single_amt) || "---" }}
+            ={{ $utils.currency_format(item.amount) || "---" }}
           </template>
           <template #price="{ item }"> </template>
           <template #amount="{ item }">
@@ -171,8 +190,10 @@
       v-if="checkData && roomData"
       :BookingData="checkData"
       :roomData="roomData"
+      :company_id="company_id"
     />
-    <v-row style="margin-top: 80px"
+
+    <v-row style="margin-top: 10px"
       ><v-col class="text-center">
         <v-btn
           v-if="
@@ -191,7 +212,12 @@
         </v-chip></v-col
       ></v-row
     >
+    <br />
+    <br />
+    <br />
+    <br />
   </div>
+
   <div v-else style="padding: 25%">UnAuthorised Access</div>
 </template>
 
