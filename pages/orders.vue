@@ -38,7 +38,12 @@
               ></v-expansion-panel-header
             >
             <v-expansion-panel-content style="width: 100%; padding: 0px">
-              <v-row :key="index2" v-for="(item, index2) in items" class="pt-2">
+              <v-row
+                :key="index2"
+                v-for="(item, index2) in items"
+                class="pt-2"
+                style="border-bottom: 1px solid #ddd"
+              >
                 <v-col cols="1" style="padding-right: 0px">
                   {{ index2 + 1 }}
                 </v-col>
