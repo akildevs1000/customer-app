@@ -59,7 +59,7 @@
                   </v-col>
                 </v-row>
 
-                <v-col cols="12" v-if="intro">
+                <!-- <v-col cols="12" v-if="intro">
                   <img
                     src="/home2.jpeg"
                     @click="
@@ -68,7 +68,7 @@
                     "
                     class="profile-image"
                   />
-                </v-col>
+                </v-col> -->
                 <v-col cols="12" v-if="intro">
                   <v-btn
                     dense
